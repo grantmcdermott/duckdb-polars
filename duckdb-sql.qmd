@@ -664,8 +664,9 @@ con.query(
 :::{.callout-tip}
 ## Challenge
 
-Redo the above join but, rather than using CTEs, use tables that you
-first create in DuckDB's memory bank. Again, this will simplify the actual join operation and also emphasise how crazy fast joins are in DuckDB.
+Redo the above join but, rather than using CTEs, use tables that you first
+create in DuckDB's memory bank. Again, this will simplify the actual join
+operation and also emphasise how crazy fast joins are in DuckDB.
 :::
 
 ## Windowing

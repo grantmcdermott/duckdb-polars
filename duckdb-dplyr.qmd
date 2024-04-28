@@ -1,0 +1,172 @@
+---
+title: Hands on with DuckDB + dplyr
+execute:
+  freeze: auto
+  cache: true
+---
+
+## Load libraries
+
+```{r dbplyr_libs}
+#| cache: false
+
+library(duckdb)
+library(dplyr)
+library(tidyr)
+```
+
+## Create a database connection
+
+For the `d(b)plyr` workflow, the connection step is very similar to the pure SQL
+approach. The only difference is that, after instantiating the database
+connection, we need to register our parquet dataset as a table in our connection
+via the `dplyr::tbl()` function. Note that we also assign it to an object (here:
+`nyc`) that can be referenced from R.
+
+```{r dbplyr_con}
+#| cache: false
+
+## Instantiate the in-memory DuckDB connection 
+con = dbConnect(duckdb(), shutdown = TRUE)
+
+## Register our parquet dataset as table in our connection (and that assign it
+## to an object that R understands)
+# nyc = tbl(con, "nyc-taxi/**/*.parquet") # works, but safer to use the read_parquet func)
+nyc = tbl(con, "read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)")
+```
+
+This next command runs instantly because all computation is deferred (i.e.,
+lazy eval). In other words, it is just a query object.
+
+```{r dbplyr_q1}
+q1 = nyc |>
+  summarize(
+    mean_tip = mean(tip_amount),
+    .by = passenger_count
+  )
+```
+
+:::{.callout-tip}
+## `.by` versus `group_by` 
+In case you weren't aware: `summarize(..., .by = x)` is a shorthand (and
+non-persistent) version of `group_by(x) |> summarize(...)`. More details
+[here](https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-per-operation-grouping/).
+:::
+
+We can see what DuckDB's query tree looks like by asking it to explain
+the plan
+
+```{r dbplyr_q1_explain}
+explain(q1)
+```
+
+Similarly, to show the SQL translation that will be implemented on the backend,
+using `show_query`.
+
+```{r dbplyr_q1_show_query}
+show_query(q1)
+```
+
+Note that printing the query object actually does enforce some computation.
+OTOH it's still just a preview of the data (we haven't pulled everything into
+R's memory)
+
+```{r dbplyr_q1_print}
+q1
+```
+
+To actually pull all of the result data into R, we must call `collect()`
+on the query object
+```{r dbplyr_q1_collect}
+tic = Sys.time()
+dat1 = collect(q1)
+toc = Sys.time()
+
+dat1
+toc - tic
+```
+
+```{r dbplyr_dat_time}
+#| include: false
+dat1_time = sprintf("%.2f", toc - tic)
+```
+
+## Aggregation
+
+Here's our earlier filtering example with multiple grouping + aggregation
+variables...
+
+```{r dbplyr_q2}
+q2 = nyc |>
+  filter(month <= 3) |>
+  summarize(
+    across(c(tip_amount, fare_amount), mean),
+    .by = c(month, passenger_count)
+  )
+q2
+```
+
+Aside: note the optimised query includes hash groupings and projection
+(basically: fancy column subsetting, which is a suprisingly effective strategy
+in query optimization)
+
+```{r dbplyr_q2_explain}
+explain(q2)
+```
+
+And our high-dimensional aggregation example. We'll create a query for this
+first, since I'll reuse it shortly again
+
+```{r dbplyr_q3}
+q3 = nyc |>
+  group_by(passenger_count, trip_distance) |>
+  summarize(
+    across(c(tip_amount, fare_amount), mean),
+  ) 
+collect(q3)
+```
+
+## Pivot (reshape)
+
+```{r dbplyr_q3_pivot}
+# library(tidyr) ## already loaded
+
+q3 |>
+  pivot_longer(tip_amount:fare_amount) |>
+  collect()
+```
+
+## Joins (merges)
+
+```{r dbplyr_pivot}
+mean_tips  = nyc |> summarise(mean_tips = mean(tip_amount), .by = month)
+mean_fares = nyc |> summarise(mean_fares = mean(fare_amount), .by = month)
+```
+
+Again, these commands complete instantly because all computation has been
+deferred until absolutely necessary (i.e.,. lazy eval).
+
+```{r dbplyr_pivot2}
+left_join(
+  mean_fares,
+  mean_tips
+  ) |>
+  collect()
+```
+
+## Windowing
+
+If you recall from the native SQL API, we sampled 1 percent of the data before
+creating decile bins to reduce the computation burden of sorting the entire
+table. Unfortunately, this approach doesn't work as well for the **dplyr**
+frontend because the underlying SQL translation
+[uses](https://dbplyr.tidyverse.org/reference/dbplyr-slice.html) a generic
+sampling approach (rather than DuckDB's optimised `USING SAMPLE` statement.)
+
+## Close connection
+
+```{r dbplyr_con_close}
+#| cache: false
+
+dbDisconnect(con)
+```

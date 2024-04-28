@@ -21,6 +21,7 @@ website:
       contents:
         - duckdb.qmd
         - duckdb-sql.qmd
+        - duckdb-dplyr.qmd
 
 format:
   html:
