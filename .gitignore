@@ -41,3 +41,6 @@ rsconnect/
 
 # MacOS cruft
 .DS_Store
+
+# scratch folder
+SCRATCH/
