@@ -1,0 +1,775 @@
+---
+title: Hands on with DuckDB SQL
+subtitle: Use the same queries from R, Python, Julia...
+execute:
+  freeze: auto
+  cache: true
+---
+
+```{r reticulate_config}
+#| cache: false
+#| include: false
+Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
+```
+
+## Load libraries
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| cache: false
+
+library(duckdb)
+```
+
+### Python
+
+```{python}
+#| cache: false
+
+import duckdb
+import time # just for timing some queries
+```
+
+:::
+
+## Create a database connection
+
+The first thing we need to do is instantiate a connection with an _in-memory_
+database.^[Aside: The `shutdown = TRUE` argument is a convenience feature that
+ensures our connection is automatically terminated when our R session ends
+(i.e., even if we forget to do it manually.) I'm not aware of a similar
+convenience argument for Python; please let me know if I am missing something.]
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_con}
+#| cache: false
+ 
+con = dbConnect(duckdb(), shutdown = TRUE)
+```
+
+### Python 
+
+```{python db_con_py}
+#| cache: false
+
+con = duckdb.connect(database = ':memory:', read_only = False)
+```
+
+:::
+
+#### Digression: In-memory versus on-disk
+
+The fact that our connection lives "in memory" is a killer feature of DuckDB (one
+that it inherits from SQLite). We don't need to connect to some complicated,
+existing database infrastructure to harness all of DuckDB's power. Instead we can just spin up
+an ephemeral database that interacts directly with our R (or Python, or Julia,
+etc.) client.
+
+However, it's worth noting that you _can_ create a persistent,
+disk-backed database simply by providing a database file path argument as part
+of your connection, e.g.
+
+::: {.panel-tabset}
+
+### R
+
+```r
+## Uncomment and run the next line if you'd like to create a persistent,
+## disk-backed database instead.
+
+# con = dbConnect(duckdb(), dbdir = "nyc.duck")
+```
+
+### Python 
+
+```python
+## Uncomment and run the next line if you'd like to create a persistent,
+## disk-backed database instead.
+
+# con = duckdb.connect(database = 'nyc.duck', read_only = False)
+```
+
+:::
+
+
+(Note that the `".duck"` file extension above is optional. You could also use `".db"`, `".dbb"`, or whatever you want really.)
+
+:::{.callout-important}
+## Bigger than RAM data?
+One really important benefit of creating a persistent disk-backed database is
+that it enables out-of-core computation for bigger than RAM data. See
+[here](https://duckdb.org/2024/03/29/external-aggregation.html) for more details
+and performance considerations (which are still great).
+:::
+
+## Example query
+
+We'll start with a simple aggregation query to get situated. I'll also use
+this example to highlight some general features of DuckDB SQL and
+the underlying query engine.
+
+Okay, first query. Let's say we want to know: _What is the average tip per
+passenger count?_ A typical SQL job for this question might look as follows:
+
+```sql
+SELECT
+  passenger_count,
+  AVG(tip_amount) AS mean_tip
+FROM 'nyc-taxi/**/*.parquet'
+GROUP BY passenger_count
+ORDER BY passenger_count
+```
+
+(Where the last `ORDER BY` statement is optional. Note that ordering (i.e.,
+sorting) is a potentially expensive operation but we'll get back to that later.)
+
+This is perfectly valid DuckDB SQL too. However, we can rewrite it with slightly
+nicer syntax thanks DuckDB's
+"[friendly SQL](https://duckdb.org/docs/guides/sql_features/friendly_sql)". The 
+key changes for this simple query are going to be: (1) the `FROM` statement
+comes first, and (2) we can use the `GROUP BY ALL` and `ORDER BY ALL` statements to avoid writing out
+the "passenger_count" grouping column multiple times.^[I'll admit that the benefits don't
+seem so great for this simple example. But trust me: they make a big difference
+once you start having lots of grouping columns and complex sub-queries.]
+
+```sql
+FROM 'nyc-taxi/**/*.parquet'
+SELECT
+  passenger_count,
+  AVG(tip_amount) AS mean_tip
+GROUP BY ALL
+ORDER BY ALL
+```
+
+:::{.callout-tip}
+### DuckDB's "friendly SQL"
+One of the under-appreciated (IMHO) features of DuckDB is that it supports many
+syntax enhancements over tradional SQL dialects, which they collectively dub
+"[friendly SQL](https://duckdb.org/docs/guides/sql_features/friendly_sql)".
+Together these syntax enhancements allow you to write much more ergonomic SQL
+queries that cut down on duplication and logical inconsistencies.
+:::
+
+To run this operation from our R or Python client, simply pass the SQL query as
+a string to our connection. Let's use this as a chance to save the result and
+time our query too. 
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_dat1}
+tic = Sys.time()
+dat1 = dbGetQuery(
+  con,
+  "
+  FROM 'nyc-taxi/**/*.parquet'
+  SELECT
+    passenger_count,
+    AVG(tip_amount) AS mean_tip
+  GROUP BY ALL
+  ORDER BY ALL
+  "
+)
+toc = Sys.time()
+
+dat1
+toc - tic
+```
+
+```{r db_sql_dat1_time}
+#| include: false
+dat1_time = sprintf("%.2f", toc - tic) 
+```
+
+### Python
+
+```{python db_sql_dat1_py}
+tic = time.time()
+dat1 = (
+  con.
+  query(
+    '''
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      passenger_count,
+      AVG(tip_amount) AS mean_tip
+    GROUP BY ALL
+    ORDER BY ALL
+    '''
+    )
+)
+toc = time.time()
+
+dat1
+# print(f"Time difference of {toc - tic} seconds")
+## Timing will be misleading for this rendered Quarto doc, since we're calling
+## Python from R (via the reticulate package).
+```
+
+Note that we actually get a **polars** DataFrame as a return object. Click the
+callout box below to learn more.
+
+::::{.callout-note collapse="true"}
+## Result conversion in Python (click to expand)
+By default, the `con.query` method that we are using here will return a
+**polars** DataFrame object that Python understands "natively" (i.e., has a
+print method for and so on). Behind the scenes, this **duckdb** to **polars**
+integration relies on the **pyarrow** library being available to our Python
+environment, which have already installed for this workshop.
+
+It's also possible return other types of Python objects. For example, you can
+use the `.df()` method to coerce to a **pandas** DataFrame instead, among
+several other formats like **numpy** arrays. (Details
+[here](https://duckdb.org/docs/api/python/overview#result-conversion).) Given
+the focus of this workshop, it won't surprise you to hear that I'm going to
+stick with the default **polars** conversion.
+::::
+
+:::
+
+So that only took `r dat1_time` seconds in this rendered Quarto doc (and will
+likely be even faster when you try in an interactive session). To underscore
+just how crazy impressive this is, recall that this **includes the time that it
+takes to read the data from disk**. I can almost guarantee that the read +
+serialization time alone for traditional data wrangling workflows would take
+several minutes, and probably crash my laptop RAM. Don't forget that our full
+dataset is nearly 200 million rows deep and 30 columns wide.
+
+_Aside: We clearly have a few outlier typos in our dataset. 254 passengers in a
+single taxi trip? I don't think so. We'd probably want to filter these out with
+a `WHERE` statement if we were doing serious analysis, but I'm just going to
+leave them in for this tutorial._
+
+
+## Aggregation
+
+Let's try out some more aggregation queries. How about a slightly variation on a our first example query, where we (a) add "month" as a second grouping variable, and (b) subset to only the first
+three months of the year. 
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_dat2}
+tic = Sys.time()
+dat2 = dbGetQuery(
+  con,
+  "
+  FROM 'nyc-taxi/**/*.parquet'
+  SELECT
+    month,
+    passenger_count,
+    AVG(tip_amount) AS mean_tip
+  WHERE month <= 3
+  GROUP BY ALL
+  "
+    )
+toc = Sys.time()
+
+head(dat2)
+toc - tic
+```
+
+### Python
+
+```{python db_sql_dat_py}
+tic = time.time()
+dat2 = (
+  con.
+  query(
+    '''
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      month,
+      passenger_count,
+      AVG(tip_amount) AS mean_tip
+    WHERE month <= 3
+    GROUP BY ALL
+    '''
+  )
+)
+toc = time.time()
+
+dat2
+# print(f"Time difference of {toc - tic} seconds")
+## Timing will be misleading for this rendered Quarto doc, since we're calling
+## Python from R (via the reticulate package).
+```
+
+:::
+
+Note that this query completed even faster than the first one, even though we
+added another grouping variable. Reason: Subsetting along our Hive-partitioned
+parquet dataset allows DuckDB to take shortcuts. We can see this directly by
+prepending an `EXPLAIN` statement to our query to reveal the optmized query
+plan.
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_dat2_explain}
+dbGetQuery(
+  con,
+  "
+  EXPLAIN
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      month,
+      passenger_count,
+      AVG(tip_amount) AS mean_tip
+    WHERE month <= 3
+    GROUP BY ALL
+  "
+)
+```
+
+### Python
+
+```{python db_sql_dat_explain_py}
+con.query(
+  '''
+  EXPLAIN
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      month,
+      passenger_count,
+      AVG(tip_amount) AS mean_tip
+    WHERE month <= 3
+    GROUP BY ALL
+  '''
+)
+
+```
+
+:::
+
+_tl;dr_ DuckDB is able to exploit the month partition of our dataset, so
+subsetting means that it can avoid unecessary data ingestion. Similarly, it only
+reads in a select group of columns; that's what the "PROJECTION" part of the
+plan denotes. If nothing else, the take-home message is that DuckDB only does
+what it needs to. Laziness as a virtue!
+
+Here's a final aggregation example, this time including a high-dimensional
+grouping column (i.e., "trip_distance") and some additional aggregations.
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_dat3}
+tic = Sys.time()
+dat3 = dbGetQuery(
+  con,
+  "
+  FROM 'nyc-taxi/**/*.parquet'
+  SELECT
+    passenger_count,
+    trip_distance,
+    AVG(tip_amount) AS mean_tip,
+    AVG(fare_amount) AS mean_fare
+  GROUP BY ALL
+"
+)
+toc = Sys.time()
+
+nrow(dat3)
+head(dat3)
+toc - tic
+```
+
+### Python
+
+```{python db_sql_dat3_py}
+tic = time.time()
+dat3 = (
+  con.
+  query(
+    '''
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      passenger_count,
+      trip_distance,
+      AVG(tip_amount) AS mean_tip,
+      AVG(fare_amount) AS mean_fare
+    GROUP BY ALL
+    '''
+    )
+)
+toc = time.time()
+
+len(dat3)
+dat3
+# print(f"Time difference of {toc - tic} seconds")
+## Timing will be misleading for this rendered Quarto doc, since we're calling
+## Python from R (via the reticulate package).
+```
+
+:::
+
+## Pivot (reshape)
+
+Let's explore some pivot (reshape) examples, by building off the previous query.
+
+- `UNPIVOT`: wide => long
+- `PIVOT`: long => wide
+
+Here I'll use a
+[Common Table Expression (CTE)](https://raw.githack.com/uo-ec607/lectures/master/16-databases/16-databases.html#Common_Table_Expressions)
+to define a temporary table `tmp_table`, before unpivoting---i.e., reshaping
+long---at the
+end.
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_pivot}
+dat_long = dbGetQuery(
+  con,
+  "
+  WITH tmp_table AS (
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      passenger_count,
+      trip_distance,
+      AVG(tip_amount) AS mean_tip,
+      AVG(fare_amount) AS mean_fare
+    GROUP BY ALL
+  )
+  UNPIVOT tmp_table
+  ON mean_tip, mean_fare
+  INTO
+    NAME variable
+    VALUE amount
+  "
+)
+
+head(dat_long)
+```
+
+### Python
+
+```{python db_sql_pivot_py}
+dat_long = (
+  con.
+  query(
+    '''
+    WITH tmp_table AS (
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        passenger_count,
+        trip_distance,
+        AVG(tip_amount) AS mean_tip,
+        AVG(fare_amount) AS mean_fare
+      GROUP BY ALL
+    )
+    UNPIVOT tmp_table
+    ON mean_tip, mean_fare
+    INTO
+      NAME variable
+      VALUE amount
+    '''
+  )
+)
+
+dat_long
+```
+
+:::
+
+Another option would have been to create a new table in memory
+and then pivot over that, which segues nicely to...
+
+### Digression: Create new tables
+
+CTEs are a very common, and often efficient, way to implement multi-table
+operations in SQL. But, for the record, we can create new tables in DuckDB's
+memory cache pretty easily using the `CREATE TABLE` statement.
+
+::: {.panel-tabset}
+
+### R
+
+Instead of `DBI::dbGetQuery`, we must now use `DBI::dbExecute`.
+
+```{r, db_sql_taxi2}
+dbExecute(
+    con,
+    "
+    CREATE TABLE taxi2 AS
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        passenger_count,
+        trip_distance,
+        AVG(tip_amount) AS mean_tip,
+        AVG(fare_amount) AS mean_fare
+      GROUP BY ALL
+    "
+)
+
+dbListTables(con)
+```
+
+FWIW, you can always remove a table with `dbRemoveTable()`.
+
+### Python 
+
+Instead of `con.query()`, we must now use `con.execute()`.
+
+```{python, db_sql_taxi2_py}
+con.execute(
+  '''
+  CREATE TABLE taxi2 AS
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      passenger_count,
+      trip_distance,
+      AVG(tip_amount) AS mean_tip,
+      AVG(fare_amount) AS mean_fare
+    GROUP BY ALL
+  '''
+)
+
+# https://stackoverflow.com/q/75727685
+con.query(
+  '''
+  SELECT table_name, estimated_size AS nrows, column_count AS ncols
+  FROM duckdb_tables;
+  '''
+)
+```
+:::
+
+### Back to reshaping
+
+With our new `taxi2` table in hand, let's redo the previous unpivot query
+directly on this new table. This makes the actual (un)pivot statement a bit
+clearer... and also separates out the execution time.
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_pivot2}
+dbGetQuery(
+  con,
+  "
+  UNPIVOT taxi2
+  ON mean_tip, mean_fare
+  INTO
+    NAME variable
+    VALUE amount
+  LIMIT 5
+  "
+)
+```
+
+### Python
+
+```{python db_sql_ldat2_py}
+con.query(
+  '''
+  UNPIVOT taxi2
+  ON mean_tip, mean_fare
+  INTO
+    NAME variable
+    VALUE amount
+  LIMIT 5
+  '''
+)
+```
+
+:::
+
+(Note how crazy fast pivoting in DuckDB actually is.)
+
+## Joins (merges)
+
+It's a bit hard to demonstrate a join with only a single main table. But here is
+a contrived example, where we calculate the mean monthly tips and the mean
+monthly fares as separate sub-queries (CTEs), before joining them together by
+month.
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_join}
+dbGetQuery(
+  con,
+  "
+  WITH 
+    mean_tips AS (
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        month,
+        AVG(tip_amount) AS mean_tip
+      GROUP BY month
+    ),
+    mean_fares AS (
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        month,
+        AVG(fare_amount) AS mean_fare
+      GROUP BY month 
+    )
+  FROM mean_tips
+  LEFT JOIN mean_fares
+  USING (month)
+  SELECT *
+  ORDER BY mean_tips.month
+  "
+)
+```
+
+### Python
+
+```{python db_sql_join_py}
+con.query(
+  '''
+  WITH 
+    mean_tips AS (
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        month,
+        AVG(tip_amount) AS mean_tip
+      GROUP BY month
+    ),
+    mean_fares AS (
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        month,
+        AVG(fare_amount) AS mean_fare
+      GROUP BY month 
+    )
+  FROM mean_tips
+  LEFT JOIN mean_fares
+  USING (month)
+  SELECT *
+  ORDER BY mean_tips.month
+  '''
+)
+```
+
+:::
+
+:::{.callout-tip}
+## Challenge
+
+Redo the above join but, rather than using CTEs, use tables that you
+first create in DuckDB's memory bank. Again, this will simplify the actual join operation and also emphasise how crazy fast joins are in DuckDB.
+:::
+
+## Windowing
+
+One last example: Binning "trip_distance" into deciles and then calculating the
+the mean "tip_amount" within each decile. This is an example of a
+[window function](https://duckdb.org/2021/10/13/windowing.html)
+and query pattern that I use _all the time_ in my own work. I find it extremely
+useful for quickly pulling out descriptive patterns from large datasets, from
+which I can then develop a better intuition of my data. In turn, this shapes the
+hypotheses and modeling choices that I make in the subsequent analysis stage.
+
+:::{.callout-warning}
+## Sorting and sampling
+I'm using a 1% random sample of my data here (see the `USING SAMPLE 1%`
+statement).  Why? Because calculating deciles requires ranking your data and
+this is expensive! To rank data, we first have to sort it (`ORDER`) and this
+requires evaluating/comparing every single row in your dataset. In turn, this
+means that it's very hard to take shortcuts. (This is one reason why DuckDB's
+optimized query plan will always delay sorting until as late as possible; to
+only sort on a smaller subset/aggregation of the data if possible.) FWIW,
+DuckDB's sorting algorithm is still
+[crazy fast](https://duckdb.org/2021/08/27/external-sorting.html).
+But for data of this size, and where sorting on the full datset is unavoidable,
+I strongly recommend sampling first. Your general insights will almost certainly
+remain intact.
+:::
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_sql_bins}
+dbGetQuery(
+  con,
+  "
+  WITH trip_deciles AS (
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      tip_amount,
+      trip_distance,
+      NTILE(10) OVER (ORDER BY trip_distance) AS decile
+    USING SAMPLE 1%
+  )
+  FROM trip_deciles
+  SELECT
+    decile,
+    AVG(trip_distance) AS mean_distance,
+    AVG(tip_amount) AS mean_tip
+  GROUP BY ALL
+  ORDER BY ALL
+  "
+)
+```
+
+### Python
+
+```{python db_sql_bins_py}
+con.query(
+  '''
+  WITH trip_deciles AS (
+    FROM 'nyc-taxi/**/*.parquet'
+    SELECT
+      tip_amount,
+      trip_distance,
+      NTILE(10) OVER (ORDER BY trip_distance) AS decile
+    USING SAMPLE 1%
+  )
+  FROM trip_deciles
+  SELECT
+    decile,
+    AVG(trip_distance) AS mean_distance,
+    AVG(tip_amount) AS mean_tip
+  GROUP BY ALL
+  ORDER BY ALL
+  '''
+)
+```
+
+:::
+
+
+## Close connection
+
+::: {.panel-tabset}
+
+### R
+
+```{r db_con_close}
+#| cache: false
+
+dbDisconnect(con)
+```
+
+Again, this step isn't strictly necessary since we instantiated our connection
+with the `shutdown = TRUE` argument. But it's worth seeing in case you want to
+be explicit.
+
+### Python
+
+```{python db_con_close_py}
+#| cache: false
+
+con.close()
+```
+
+:::

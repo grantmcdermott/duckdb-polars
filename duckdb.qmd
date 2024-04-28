@@ -1,0 +1,5 @@
+---
+title: DuckDB intro
+---
+
+Very brief back to DuckDB. Features I love, link to blog ad further resources etc.
