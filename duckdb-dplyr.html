@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>duckdb-polars - DuckDB + dplyr (R)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">duckdb-polars</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./requirements.html"> 
+<span class="menu-text">Requirements</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-duckdb" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">DuckDB</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-duckdb">    
+        <li>
+    <a class="dropdown-item" href="./duckdb.html">
+ <span class="dropdown-text">DuckDB intro</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./duckdb-sql.html">
+ <span class="dropdown-text">DuckDB SQL</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./duckdb-dplyr.html">
+ <span class="dropdown-text">DuckDB + dplyr (R)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./duckdb-ibis.html">
+ <span class="dropdown-text">DuckDB + Ibis (Python)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-polars" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Polars</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-polars">    
+        <li>
+    <a class="dropdown-item" href="./polars.html">
+ <span class="dropdown-text">Polars intro</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./rpy-polars.html">
+ <span class="dropdown-text">Polars from Python and R</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./duckdb-dplyr.html">DuckDB + dplyr (R)</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./duckdb.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DuckDB intro</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./duckdb-sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DuckDB SQL</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./duckdb-dplyr.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">DuckDB + dplyr (R)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./duckdb-ibis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DuckDB + Ibis (Python)</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-libraries" id="toc-load-libraries" class="nav-link active" data-scroll-target="#load-libraries">Load libraries</a></li>
+  <li><a href="#create-a-database-connection" id="toc-create-a-database-connection" class="nav-link" data-scroll-target="#create-a-database-connection">Create a database connection</a></li>
+  <li><a href="#first-example" id="toc-first-example" class="nav-link" data-scroll-target="#first-example">First example</a></li>
+  <li><a href="#aggregation" id="toc-aggregation" class="nav-link" data-scroll-target="#aggregation">Aggregation</a></li>
+  <li><a href="#pivot-reshape" id="toc-pivot-reshape" class="nav-link" data-scroll-target="#pivot-reshape">Pivot (reshape)</a></li>
+  <li><a href="#joins-merges" id="toc-joins-merges" class="nav-link" data-scroll-target="#joins-merges">Joins (merges)</a></li>
+  <li><a href="#windowing" id="toc-windowing" class="nav-link" data-scroll-target="#windowing">Windowing</a></li>
+  <li><a href="#close-connection" id="toc-close-connection" class="nav-link" data-scroll-target="#close-connection">Close connection</a></li>
+  <li><a href="#appendix-related-interfaces" id="toc-appendix-related-interfaces" class="nav-link" data-scroll-target="#appendix-related-interfaces">Appendix: Related interfaces</a>
+  <ul class="collapse">
+  <li><a href="#arrowduckdb" id="toc-arrowduckdb" class="nav-link" data-scroll-target="#arrowduckdb">arrow+duckdb</a></li>
+  <li><a href="#duckplyr" id="toc-duckplyr" class="nav-link" data-scroll-target="#duckplyr">duckplyr</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DuckDB + dplyr (R)</h1>
+<p class="subtitle lead">Use a familiar R frontend</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="load-libraries" class="level2">
+<h2 class="anchored" data-anchor-id="load-libraries">Load libraries</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckdb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: DBI</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-a-database-connection" class="level2">
+<h2 class="anchored" data-anchor-id="create-a-database-connection">Create a database connection</h2>
+<p>For the <code>d(b)plyr</code> workflow, the connection step is very similar to the pure SQL approach. The only difference is that, after instantiating the database connection, we need to register our parquet dataset as a table in our connection via the <code>dplyr::tbl()</code> function. Note that we also assign it to an object (here: <code>nyc</code>) that can be referenced from R.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Instantiate the in-memory DuckDB connection </span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>con <span class="ot">=</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">shutdown =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Register our parquet dataset as table in our connection (and that assign it</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">## to an object that R understands)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># nyc = tbl(con, "nyc-taxi/**/*.parquet") # works, but safer to use the read_parquet func)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>nyc <span class="ot">=</span> <span class="fu">tbl</span>(con, <span class="st">"read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="first-example" class="level2">
+<h2 class="anchored" data-anchor-id="first-example">First example</h2>
+<p>This next command runs instantly because all computation is deferred (i.e., lazy eval). In other words, it is just a query object.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">=</span> nyc <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<code>.by</code> versus <code>group_by</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In case you weren’t aware: <code>summarize(..., .by = x)</code> is a shorthand (and non-persistent) version of <code>group_by(x) |&gt; summarize(...)</code>. More details <a href="https://www.tidyverse.org/blog/2023/02/dplyr-1-1-0-per-operation-grouping/">here</a>.</p>
+</div>
+</div>
+<p>We can see what DuckDB’s query tree looks like by asking it to explain the plan</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">explain</span>(q1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Missing values are always removed in SQL aggregation functions.
+Use `na.rm = TRUE` to silence this warning
+This warning is displayed once every 8 hours.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;SQL&gt;
+SELECT passenger_count, AVG(tip_amount) AS mean_tip
+FROM (FROM read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)) q01
+GROUP BY passenger_count
+
+&lt;PLAN&gt;
+physical_plan
+┌───────────────────────────┐
+│       HASH_GROUP_BY       │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│             #0            │
+│          avg(#1)          │
+└─────────────┬─────────────┘                             
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│      passenger_count      │
+│         tip_amount        │
+└─────────────┬─────────────┘                             
+┌─────────────┴─────────────┐
+│       READ_PARQUET        │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│      passenger_count      │
+│         tip_amount        │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│       EC: 179629584       │
+└───────────────────────────┘                             </code></pre>
+</div>
+</div>
+<p>Similarly, to show the SQL translation that will be implemented on the backend, using <code>show_query</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_query</span>(q1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;SQL&gt;
+SELECT passenger_count, AVG(tip_amount) AS mean_tip
+FROM (FROM read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)) q01
+GROUP BY passenger_count</code></pre>
+</div>
+</div>
+<p>Note that printing the query object actually does enforce some computation. OTOH it’s still just a preview of the data (we haven’t pulled everything into R’s memory).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>q1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Source:   SQL [?? x 2]
+# Database: DuckDB v0.10.1 [gmcd@Darwin 23.4.0:R 4.4.0/:memory:]
+   passenger_count mean_tip
+             &lt;dbl&gt;    &lt;dbl&gt;
+ 1               5    1.10 
+ 2              65    0    
+ 3               9    0.807
+ 4             177    1    
+ 5               0    0.862
+ 6             254    0    
+ 7             249    0    
+ 8               7    0.544
+ 9               8    0.351
+10              66    1.5  
+# ℹ more rows</code></pre>
+</div>
+</div>
+<p>To actually pull all of the result data into R, we must call <code>collect()</code> on the query object</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tic <span class="ot">=</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>dat1 <span class="ot">=</span> <span class="fu">collect</span>(q1)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>toc <span class="ot">=</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>dat1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 2
+   passenger_count mean_tip
+             &lt;dbl&gt;    &lt;dbl&gt;
+ 1               0    0.862
+ 2             254    0    
+ 3             249    0    
+ 4               5    1.10 
+ 5              65    0    
+ 6               9    0.807
+ 7             177    1    
+ 8               2    1.08 
+ 9             208    0    
+10              10    0    
+11               4    0.845
+12               1    1.15 
+13             247    2.3  
+14               3    0.963
+15               6    1.13 
+16               7    0.544
+17               8    0.351
+18              66    1.5  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>toc <span class="sc">-</span> tic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time difference of 1.2924 secs</code></pre>
+</div>
+</div>
+</section>
+<section id="aggregation" class="level2">
+<h2 class="anchored" data-anchor-id="aggregation">Aggregation</h2>
+<p>Here’s our earlier filtering example with multiple grouping + aggregation variables…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">=</span> nyc <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">&lt;=</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(tip_amount, fare_amount), mean),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> <span class="fu">c</span>(month, passenger_count)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>q2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Source:   SQL [?? x 4]
+# Database: DuckDB v0.10.1 [gmcd@Darwin 23.4.0:R 4.4.0/:memory:]
+   month passenger_count tip_amount fare_amount
+   &lt;dbl&gt;           &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+ 1     1               1      1.04         9.76
+ 2     2               1      1.07         9.90
+ 3     3               1      1.09        10.2 
+ 4     1               8      0           21.3 
+ 5     2               8      0.5          8.23
+ 6     1               7      0            6.3 
+ 7     1               3      0.875        9.87
+ 8     1               6      1.02         9.86
+ 9     2               3      0.895        9.98
+10     2               6      1.02         9.96
+# ℹ more rows</code></pre>
+</div>
+</div>
+<p>Aside: note the optimised query includes hash groupings and projection (basically: fancy column subsetting, which is a suprisingly effective strategy in query optimization)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">explain</span>(q2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;SQL&gt;
+SELECT
+  "month",
+  passenger_count,
+  AVG(tip_amount) AS tip_amount,
+  AVG(fare_amount) AS fare_amount
+FROM (
+  SELECT q01.*
+  FROM (FROM read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)) q01
+  WHERE ("month" &lt;= 3.0)
+) q01
+GROUP BY "month", passenger_count
+
+&lt;PLAN&gt;
+physical_plan
+┌───────────────────────────┐
+│       HASH_GROUP_BY       │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│             #0            │
+│             #1            │
+│          avg(#2)          │
+│          avg(#3)          │
+└─────────────┬─────────────┘                             
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│           month           │
+│      passenger_count      │
+│         tip_amount        │
+│        fare_amount        │
+└─────────────┬─────────────┘                             
+┌─────────────┴─────────────┐
+│       READ_PARQUET        │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│      passenger_count      │
+│        fare_amount        │
+│         tip_amount        │
+│           month           │
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│ File Filters: (month &lt;= 3)│
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│        EC: 44907396       │
+└───────────────────────────┘                             </code></pre>
+</div>
+</div>
+<p>And our high-dimensional aggregation example. We’ll create a query for this first, since I’ll reuse it shortly again</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>q3 <span class="ot">=</span> nyc <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(passenger_count, trip_distance) <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(tip_amount, fare_amount), mean),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">collect</span>(q3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 25,569 × 4
+# Groups:   passenger_count [18]
+   passenger_count trip_distance tip_amount fare_amount
+             &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+ 1               1          0.7       0.493        5.04
+ 2               2          0.8       0.462        5.44
+ 3               1          0.8       0.535        5.36
+ 4               1          1         0.616        6.01
+ 5               1          0.3       0.334        4.11
+ 6               1          4.8       1.70        16.0 
+ 7               2          1         0.525        6.08
+ 8               1          6.7       2.13        20.1 
+ 9               1          0.4       0.361        4.17
+10               2          0.98      0.542        5.85
+# ℹ 25,559 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="pivot-reshape" class="level2">
+<h2 class="anchored" data-anchor-id="pivot-reshape">Pivot (reshape)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidyr) ## already loaded</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>q3 <span class="sc">|&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(tip_amount<span class="sc">:</span>fare_amount) <span class="sc">|&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 51,138 × 4
+# Groups:   passenger_count [18]
+   passenger_count trip_distance name       value
+             &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;
+ 1               1           2.2 tip_amount 1.01 
+ 2               1          16.8 tip_amount 5.58 
+ 3               1           2.7 tip_amount 1.16 
+ 4               1           5.9 tip_amount 1.93 
+ 5               1           8.4 tip_amount 2.93 
+ 6               0           2.4 tip_amount 0.924
+ 7               1           3.8 tip_amount 1.46 
+ 8               1           5.4 tip_amount 1.83 
+ 9               1           9.3 tip_amount 3.40 
+10               1           9.8 tip_amount 3.60 
+# ℹ 51,128 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="joins-merges" class="level2">
+<h2 class="anchored" data-anchor-id="joins-merges">Joins (merges)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mean_tips  <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_tips =</span> <span class="fu">mean</span>(tip_amount), <span class="at">.by =</span> month)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>mean_fares <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_fares =</span> <span class="fu">mean</span>(fare_amount), <span class="at">.by =</span> month)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Again, these commands complete instantly because all computation has been deferred until absolutely necessary (i.e.,. lazy eval).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  mean_fares,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  mean_tips</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(month)`</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Missing values are always removed in SQL aggregation functions.
+Use `na.rm = TRUE` to silence this warning
+This warning is displayed once every 8 hours.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 3
+   month mean_fares mean_tips
+   &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1    11      12.3       1.25
+ 2     7      10.4       1.06
+ 3     8      10.5       1.08
+ 4     1       9.81      1.01
+ 5     4      10.3       1.04
+ 6     5      10.6       1.08
+ 7     9      12.4       1.25
+ 8    10      12.5       1.28
+ 9     2       9.94      1.04
+10    12      12.3       1.24
+11     3      10.2       1.06
+12     6      10.5       1.09</code></pre>
+</div>
+</div>
+</section>
+<section id="windowing" class="level2">
+<h2 class="anchored" data-anchor-id="windowing">Windowing</h2>
+<p>If you recall from the native SQL API, we sampled 1 percent of the data before creating decile bins to reduce the computation burden of sorting the entire table. Unfortunately, this approach doesn’t work as well for the <strong>dplyr</strong> frontend because the underlying SQL translation <a href="https://dbplyr.tidyverse.org/reference/dbplyr-slice.html">uses</a> a generic sampling approach (rather than DuckDB’s optimised <code>USING SAMPLE</code> statement.)</p>
+</section>
+<section id="close-connection" class="level2">
+<h2 class="anchored" data-anchor-id="close-connection">Close connection</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="appendix-related-interfaces" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-related-interfaces">Appendix: Related interfaces</h2>
+<section id="arrowduckdb" class="level3">
+<h3 class="anchored" data-anchor-id="arrowduckdb">arrow+duckdb</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'arrow'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:utils':
+
+    timestamp</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckdb) <span class="do">## Already loaded</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)  <span class="do">## Already loaded</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)  <span class="do">## Already loaded</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When going through the <strong>arrow</strong> intermediary, we don’t need to establish a database with <code>DBI::dbConnect</code> like we did above. Instead, we can create a link (pointers) to the dataset on disk directly via the <code>arrow::open_dataset()</code> convience function. Here I’ll assign it to a new R object called <code>nyc2</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="ot">=</span> <span class="fu">open_dataset</span>(<span class="st">"nyc-taxi"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+open_dataset() versus read_parquet()
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>(For individual parquet files, we could just read then via <code>arrow::read_parquet()</code>, perhaps efficiently subsetting columns at the same time. But I find the <code>open_dataset</code> is generally what I’m looking for.)</p>
+</div>
+</div>
+<p>Note that printing our <code>nyc2</code> dataset to the R console will just display the data schema. This is a cheap and convenient way to quickly interrogate the basic structure of your data, including column types, etc.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>nyc2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FileSystemDataset with 12 Parquet files
+vendor_name: string
+pickup_datetime: timestamp[ms]
+dropoff_datetime: timestamp[ms]
+passenger_count: int64
+trip_distance: double
+pickup_longitude: double
+pickup_latitude: double
+rate_code: string
+store_and_fwd: string
+dropoff_longitude: double
+dropoff_latitude: double
+payment_type: string
+fare_amount: double
+extra: double
+mta_tax: double
+tip_amount: double
+tolls_amount: double
+total_amount: double
+improvement_surcharge: double
+congestion_surcharge: double
+pickup_location_id: int64
+dropoff_location_id: int64
+year: int32
+month: int32</code></pre>
+</div>
+</div>
+<p>The key step for this “arrow + duckdb” <strong>dplyr</strong> workflow is to pass our arrow dataset to DuckDB via the <code>to_duckdb()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">to_duckdb</span>(nyc2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Source:   table&lt;arrow_001&gt; [?? x 24]
+# Database: DuckDB v0.10.1 [root@Darwin 23.4.0:R 4.4.0/:memory:]
+   vendor_name pickup_datetime     dropoff_datetime    passenger_count
+   &lt;chr&gt;       &lt;dttm&gt;              &lt;dttm&gt;                        &lt;dbl&gt;
+ 1 CMT         2012-01-20 14:09:36 2012-01-20 14:42:25               1
+ 2 CMT         2012-01-20 14:54:10 2012-01-20 15:06:55               1
+ 3 CMT         2012-01-20 08:08:01 2012-01-20 08:11:02               1
+ 4 CMT         2012-01-20 08:36:22 2012-01-20 08:39:44               1
+ 5 CMT         2012-01-20 20:58:32 2012-01-20 21:03:04               1
+ 6 CMT         2012-01-20 19:40:20 2012-01-20 19:43:43               2
+ 7 CMT         2012-01-21 01:54:37 2012-01-21 02:08:02               2
+ 8 CMT         2012-01-21 01:55:47 2012-01-21 02:08:51               3
+ 9 VTS         2012-01-07 22:20:00 2012-01-07 22:27:00               2
+10 VTS         2012-01-10 07:11:00 2012-01-10 07:21:00               1
+# ℹ more rows
+# ℹ 20 more variables: trip_distance &lt;dbl&gt;, pickup_longitude &lt;dbl&gt;,
+#   pickup_latitude &lt;dbl&gt;, rate_code &lt;chr&gt;, store_and_fwd &lt;chr&gt;,
+#   dropoff_longitude &lt;dbl&gt;, dropoff_latitude &lt;dbl&gt;, payment_type &lt;chr&gt;,
+#   fare_amount &lt;dbl&gt;, extra &lt;dbl&gt;, mta_tax &lt;dbl&gt;, tip_amount &lt;dbl&gt;,
+#   tolls_amount &lt;dbl&gt;, total_amount &lt;dbl&gt;, improvement_surcharge &lt;dbl&gt;,
+#   congestion_surcharge &lt;dbl&gt;, pickup_location_id &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>Note that this transfer from Arrow to DuckDB is very quick (and memory cheap) because it is a zero copy. We are just passing around pointers instead of actually moving any data. See <a href="https://duckdb.org/2021/12/03/duck-arrow.html">this blog post</a> for more details, but the high-level take away is that we are benefitting from the tightly integrated architectures of these two libraries.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>At this, point all of the regular <strong>dplyr</strong> workflow logic from above should carry over. Just remember to first pass the arrow dataset via the <code>to_duckdb()</code> funciton. For example, here’s our initial aggregation query again:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">to_duckdb</span>() <span class="sc">|&gt;</span> <span class="do">## &lt;= key step</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Missing values are always removed in SQL aggregation functions.
+Use `na.rm = TRUE` to silence this warning
+This warning is displayed once every 8 hours.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 2
+   passenger_count mean_tip
+             &lt;dbl&gt;    &lt;dbl&gt;
+ 1               5    1.10 
+ 2               9    0.807
+ 3              65    0    
+ 4             177    1    
+ 5               7    0.544
+ 6               8    0.351
+ 7              66    1.5  
+ 8               1    1.15 
+ 9             247    2.3  
+10               4    0.845
+11               0    0.862
+12             254    0    
+13             249    0    
+14               2    1.08 
+15             208    0    
+16              10    0    
+17               3    0.963
+18               6    1.13 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Arrow’s native acero engine
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Some of you may be used to performing computation with the <strong>arrow</strong> package without going through DuckDB. What’s happening here is that arrow provides its own computation engine called “acero”. This Arrow-native engine is actually pretty performant… albeit not a fast as DuckDB, nor as feature rich. So I personally recommend always passing to DuckDB if you can. Still, if you’re curious then you can test yourself by re-trying the code chunk, but commenting out the <code>to_duckdb()</code> line. For more details, see <a href="https://youtu.be/LvTX1ZAZy6M?si=7gZYG03ojtAtPGfe">here</a>.</p>
+</div>
+</div>
+</section>
+<section id="duckplyr" class="level3">
+<h3 class="anchored" data-anchor-id="duckplyr">duckplyr</h3>
+<p>The new kid on the block is <strong>duckplyr</strong> (<a href="https://duckdb.org/2024/04/02/duckplyr.html">announcement</a> / <a href="https://duckdblabs.github.io/duckplyr/">homepage</a>). Without going into too much depth, the promise of <strong>duckplyr</strong> is that it can provide a “fully native” dplyr experience that is <em>directly</em> coupled to DuckDB’s query engine. So, for example, it won’t have to rely on <strong>DBI</strong>’s generic’ SQL translations. Instead, the relevant <strong>dplyr</strong> “verbs” are being directly translated to DuckDB’s relational API to construct logical query plans. If that’s too much jargon, just know that it should involve less overhead, fewer translation errors, and better optimization. Moreover, a goal of <strong>duckplyr</strong> is for it to be a drop-in replace for <strong>dplyr</strong> <em>in general</em>. In other words, you could just swap out <code>library(dplyr)</code> for <code>library(duckplyr)</code> and all of your data wrangling operations will come backed by the power of DuckDB. This includes for working on “regular” R data frames in memory.</p>
+<p>All of this is exciting and I would urge you stay tuned. Right now, <strong>duckplyr</strong> is still marked as experimental and has a few rough edges. But the basics are there. For example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'duckplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">duckplyr_df_from_parquet</span>(<span class="st">"nyc-taxi/**/*.parquet"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>materializing:
+---------------------
+--- Relation Tree ---
+---------------------
+Aggregate [passenger_count, mean(tip_amount)]
+  read_parquet(nyc-taxi/**/*.parquet)
+
+---------------------
+-- Result Columns  --
+---------------------
+- passenger_count (BIGINT)
+- mean_tip (DOUBLE)
+
+   passenger_count  mean_tip
+1                2 1.0815798
+2              208 0.0000000
+3               10 0.0000000
+4                5 1.1027325
+5                9 0.8068000
+6              177 1.0000000
+7               65 0.0000000
+8                3 0.9629494
+9                6 1.1283649
+10               4 0.8445190
+11               0 0.8620988
+12             254 0.0000000
+13             249 0.0000000
+14               1 1.1510110
+15             247 2.3000000
+16               8 0.3507692
+17               7 0.5441176
+18              66 1.5000000</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>“Similar” might be a better description than “integrated”, since DuckdB does not use the Arrow memory model. But they are both columnar-orientated (among other things) and so the end result is pretty seamless integration.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

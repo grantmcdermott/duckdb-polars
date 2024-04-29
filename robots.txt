@@ -1,0 +1,1 @@
+Sitemap: https://grantmcdermott.github.io/duckdb-polars/sitemap.xml
