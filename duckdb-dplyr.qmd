@@ -170,3 +170,113 @@ sampling approach (rather than DuckDB's optimised `USING SAMPLE` statement.)
 
 dbDisconnect(con)
 ```
+
+## Appendix: Related interfaces
+
+### arrow to duckdb
+
+```{r arrow_libs}
+library(arrow)
+library(duckdb) ## Already loaded
+library(dplyr)  ## Already loaded
+library(tidyr)  ## Already loaded
+```
+
+When going through the **arrow** intermediary, we don't need to establish a
+database with `DBI::dbConnect` like we did above. Instead, we can create a link
+(pointers) to the dataset on disk directly via the `arrow::open_dataset()`
+convience function. Here I'll assign it to a new R object called `nyc2`.
+
+```{r nyc2}
+nyc2 = open_dataset("nyc-taxi")
+```
+
+:::{.callout-tip}
+## open_dataset() versus read_parquet()
+(For individual parquet files, we could just read then via
+`arrow::read_parquet()`, perhaps efficiently subsetting columns at the same
+time. But I find the `open_dataset` is generally what I'm looking for.)
+:::
+
+Note that printing our `nyc2` dataset to the R console will just display the
+data schema. This is a cheap and convenient way to quickly interrogate the basic
+structure of your data, including column types, etc.
+
+```{r nyc2_print}
+nyc2
+```
+
+The key step for this "arrow + duckdb" **dplyr** workflow is to pass our arrow
+dataset to DuckDB via the `to_duckdb()` function.
+
+```{r nyc2_to_duckdb}
+to_duckdb(nyc2)
+```
+
+Note that this transfer from Arrow to DuckDB is very quick (and memory cheap)
+because it is a zero copy. We are just passing around pointers instead of
+actually moving any data. See
+[this blog post](https://duckdb.org/2021/12/03/duck-arrow.html)
+for more details, but the high-level take away is that we are benefitting from
+the tightly integrated architectures of these two libraries.^["Similar" might be
+a better description than "integrated", since DuckdB does not use the Arrow
+memory model. But they are both columnar-orientated (among other things) and so
+the end result is pretty seamless integration.]
+
+At this, point all of the regular **dplyr** workflow logic from above should
+carry over. Just remember to first pass the arrow dataset via the `to_duckdb()`
+funciton. For example, here's our initial aggregation query again:
+
+```{r nyc2_q1}
+nyc2 |>
+  to_duckdb() |> ## <= key step
+  summarise(
+    mean_tip = mean(tip_amount),
+    .by = passenger_count
+  ) |>
+  collect()
+```
+
+:::{.callout-note}
+## Arrow's native acero engine
+
+Some of you may be used to performing computation with the **arrow** package
+without going through DuckDB. What's happening here is that arrow provides its
+own computation engine called "acero". This Arrow-native engine is actually
+pretty performant... albeit not a fast as DuckDB, nor as feature rich. So I
+personally recommend always passing to DuckDB if you can. Still, if you're
+curious then you can test yourself by re-trying the code chunk, but commenting
+out the `to_duckdb()` line. For more details, see
+[here](https://youtu.be/LvTX1ZAZy6M?si=7gZYG03ojtAtPGfe).
+:::
+
+## duckplyr
+
+The new kid on the block is **duckplyr**
+([announcement](https://duckdb.org/2024/04/02/duckplyr.html) /
+[homepage](https://duckdblabs.github.io/duckplyr/)).
+Without going into too much depth, the promise of **duckplyr** is that it can
+provide a "fully native" dplyr experience that is _directly_ coupled to DuckDB's
+query engine. So, for example, it won't have to rely on **DBI**'s generic' SQL
+translations. Instead, the relevant **dplyr** "verbs" are being directly
+translated to DuckDB's relational API to construct logical query plans. If
+that's too much jargon, just know that it should involve less overhead, fewer
+translation errors, and better optimization. Moreover, a goal of **duckplyr** is
+for it to be a drop-in replace for **dplyr** _in general_. In other words, you
+could just swap out `library(dplyr)` for `library(duckplyr)` and all of your
+data wrangling operations will come backed by the power of DuckDB. This includes
+for working on "regular" R data frames in memory.
+
+All of this is exciting and I would urge you stay tuned. Right now, **duckplyr**
+is still marked as experimental and has a few rough edges. But the basics are
+there. For example:
+
+```{r duckplyr_q1}
+library(duckplyr)
+
+duckplyr_df_from_parquet("nyc-taxi/**/*.parquet") |>
+  summarise(
+    mean_tip = mean(tip_amount),
+    .by = passenger_count
+  )
+```

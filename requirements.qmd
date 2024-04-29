@@ -23,7 +23,7 @@ so you're likely to get better support from me.]
 Run the following commands in your R console.
 
 ```r
-install.packages(c("duckdb", "arrow", "dplyr", "tidyr"))
+install.packages(c("duckdb", "arrow", "dplyr", "tidyr", "duckplyr"))
 ```
 
 We also have different install targets for **r-polars**, depending on your operating system.
