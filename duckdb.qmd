@@ -2,4 +2,4 @@
 title: DuckDB intro
 ---
 
-Very brief back to DuckDB. Features I love, link to blog ad further resources etc.
+PLACEHOLDER TEXT. Link to blog ad further resources etc.
