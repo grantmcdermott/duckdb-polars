@@ -148,12 +148,12 @@ q3
 (As we did in the **dplyr** code, we'll break this contrived join example into
 two steps)
 
-```{python db_ibis_pivot}
+```{python db_ibis_join0}
 mean_tips = nyc.group_by("month").agg(mean_tip = _.tip_amount.mean())
 mean_fares = nyc.group_by("month").agg(mean_fare = _.fare_amount.mean())
 ```
 
-```{python db_ibis_pivot2}
+```{python db_ibis_join1}
 (
   mean_tips
   .left_join(mean_fares, "month")

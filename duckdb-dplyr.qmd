@@ -141,7 +141,7 @@ q3 |>
 
 ## Joins (merges)
 
-```{r dbplyr_pivot}
+```{r dbplyr_join0}
 mean_tips  = nyc |> summarise(mean_tips = mean(tip_amount), .by = month)
 mean_fares = nyc |> summarise(mean_fares = mean(fare_amount), .by = month)
 ```
@@ -149,7 +149,7 @@ mean_fares = nyc |> summarise(mean_fares = mean(fare_amount), .by = month)
 Again, these commands complete instantly because all computation has been
 deferred until absolutely necessary (i.e.,. lazy eval).
 
-```{r dbplyr_pivot2}
+```{r dbplyr_join1}
 left_join(
   mean_fares,
   mean_tips
