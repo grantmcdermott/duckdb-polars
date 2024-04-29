@@ -1,0 +1,42 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "!py-polars.qmd"
+
+website:
+  title: "duckdb-polars"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - requirements.qmd
+      - sidebar:duckdb
+      - sidebar:polars
+        
+  sidebar:
+    - id: duckdb
+      title: "DuckDB"
+      style: "docked"
+      background: light
+      contents:
+        - duckdb.qmd
+        - duckdb-sql.qmd
+        - duckdb-dplyr.qmd
+        - duckdb-ibis.qmd
+    - id: polars
+      title: "Polars"
+      style: "docked"
+      background: light
+      contents:
+        - polars.qmd
+        - rpy-polars.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+
