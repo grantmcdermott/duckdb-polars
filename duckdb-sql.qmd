@@ -14,7 +14,7 @@ Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
 
 ## Load libraries
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -43,7 +43,7 @@ ensures our connection is automatically terminated when our R session ends
 (i.e., even if we forget to do it manually.) I'm not aware of a similar
 convenience argument for Python; please let me know if I am missing something.]
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -75,7 +75,7 @@ However, it's worth noting that you _can_ create a persistent,
 disk-backed database simply by providing a database file path argument as part
 of your connection, e.g.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -160,7 +160,7 @@ To run this operation from our R or Python client, simply pass the SQL query as
 a string to our connection. Let's use this as a chance to save the result and
 time our query too. 
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -253,7 +253,7 @@ leave them in for this tutorial._
 Let's try out some more aggregation queries. How about a slightly variation on a our first example query, where we (a) add "month" as a second grouping variable, and (b) subset to only the first
 three months of the year. 
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -311,7 +311,7 @@ parquet dataset allows DuckDB to take shortcuts. We can see this directly by
 prepending an `EXPLAIN` statement to our query to reveal the optmized query
 plan.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -360,7 +360,7 @@ what it needs to. Laziness as a virtue!
 Here's a final aggregation example, this time including a high-dimensional
 grouping column (i.e., "trip_distance") and some additional aggregations.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -427,7 +427,7 @@ to define a temporary table `tmp_table`, before unpivoting---i.e., reshaping
 long---at the
 end.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -494,7 +494,7 @@ CTEs are a very common, and often efficient, way to implement multi-table
 operations in SQL. But, for the record, we can create new tables in DuckDB's
 memory cache pretty easily using the `CREATE TABLE` statement.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -554,7 +554,7 @@ With our new `taxi2` table in hand, let's redo the previous unpivot query
 directly on this new table. This makes the actual (un)pivot statement a bit
 clearer... and also separates out the execution time.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -598,7 +598,7 @@ a contrived example, where we calculate the mean monthly tips and the mean
 monthly fares as separate sub-queries (CTEs), before joining them together by
 month.
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -695,7 +695,7 @@ I strongly recommend sampling first. Your general insights will almost certainly
 remain intact.
 :::
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
@@ -751,7 +751,7 @@ con.query(
 
 ## Close connection
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ### R
 
