@@ -84,7 +84,7 @@ py -m venv .venv
 Then install the Python packages that we will be using.
 
 ```sh
-python3 -m pip install duckdb polars pyarrow pandas -U
+python3 -m pip install duckdb polars pyarrow pandas matplotlib -U
 python3 -m pip install 'ibis-framework[duckdb,polars]' -U
 ```
 

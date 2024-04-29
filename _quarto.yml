@@ -2,7 +2,7 @@ project:
   type: website
   render:
     - "*.qmd"
-    - "!duckdb-py.qmd"
+    - "!py-polars.qmd"
 
 website:
   title: "duckdb-polars"
@@ -12,6 +12,7 @@ website:
         text: Home
       - requirements.qmd
       - sidebar:duckdb
+      - sidebar:polars
         
   sidebar:
     - id: duckdb
@@ -23,6 +24,13 @@ website:
         - duckdb-sql.qmd
         - duckdb-dplyr.qmd
         - duckdb-ibis.qmd
+    - id: polars
+      title: "Polars"
+      style: "docked"
+      background: light
+      contents:
+        - polars.qmd
+        - rpy-polars.qmd
 
 format:
   html:

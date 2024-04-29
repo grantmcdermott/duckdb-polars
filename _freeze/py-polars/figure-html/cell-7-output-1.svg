@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="446pt" height="231pt" viewBox="0.00 0.00 445.50 231.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 227)">
+<title>polars_query</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-227 441.5,-227 441.5,4 -4,4"/>
+<!-- SORT BY [col(&quot;passenger_count&quot;)] [(0, 0)] -->
+<g id="node1" class="node">
+<title>SORT BY [col(&quot;passenger_count&quot;)] [(0, 0)]</title>
+<polygon fill="none" stroke="black" points="324.62,-223 112.88,-223 112.88,-187 324.62,-187 324.62,-223"/>
+<text text-anchor="middle" x="218.75" y="-199.95" font-family="Times,serif" font-size="14.00">SORT BY [col(&quot;passenger_count&quot;)]</text>
+</g>
+<!-- AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)] -->
+<g id="node2" class="node">
+<title>AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)]</title>
+<polygon fill="none" stroke="black" points="369.25,-151 68.25,-151 68.25,-93.5 369.25,-93.5 369.25,-151"/>
+<text text-anchor="middle" x="218.75" y="-133.7" font-family="Times,serif" font-size="14.00">AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]</text>
+<text text-anchor="middle" x="218.75" y="-117.2" font-family="Times,serif" font-size="14.00">BY</text>
+<text text-anchor="middle" x="218.75" y="-100.7" font-family="Times,serif" font-size="14.00">[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)]</text>
+</g>
+<!-- SORT BY [col(&quot;passenger_count&quot;)] [(0, 0)]&#45;&#45;AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)] -->
+<g id="edge1" class="edge">
+<title>SORT BY [col(&quot;passenger_count&quot;)] [(0, 0)]--AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)]</title>
+<path fill="none" stroke="black" d="M218.75,-186.88C218.75,-176.6 218.75,-163.27 218.75,-151.47"/>
+</g>
+<!-- Parquet SCAN 3 files: first file: nyc&#45;taxi/year=2012/month=1/part&#45;0.parquet;
+π 3/24;
+σ (col(&quot;month&quot;)) &lt;= (3) [(0, 2)] -->
+<g id="node3" class="node">
+<title>Parquet SCAN 3 files: first file: nyc-taxi/year=2012/month=1/part-0.parquet;
+π 3/24;
+σ (col(&quot;month&quot;)) &lt;= (3) [(0, 2)]</title>
+<polygon fill="none" stroke="black" points="437.5,-57.5 0,-57.5 0,0 437.5,0 437.5,-57.5"/>
+<text text-anchor="middle" x="218.75" y="-40.2" font-family="Times,serif" font-size="14.00">Parquet SCAN 3 files: first file: nyc-taxi/year=2012/month=1/part-0.parquet;</text>
+<text text-anchor="middle" x="218.75" y="-23.7" font-family="Times,serif" font-size="14.00">π 3/24;</text>
+<text text-anchor="middle" x="218.75" y="-7.2" font-family="Times,serif" font-size="14.00">σ (col(&quot;month&quot;)) &lt;= (3)</text>
+</g>
+<!-- AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)]&#45;&#45;Parquet SCAN 3 files: first file: nyc&#45;taxi/year=2012/month=1/part&#45;0.parquet;
+π 3/24;
+σ (col(&quot;month&quot;)) &lt;= (3) [(0, 2)] -->
+<g id="edge2" class="edge">
+<title>AGG [col(&quot;tip_amount&quot;).mean().alias(&quot;mean_tip&quot;)]
+BY
+[col(&quot;month&quot;),col(&quot;passenger_count&quot;)] [(0, 1)] [(0, 1)]--Parquet SCAN 3 files: first file: nyc-taxi/year=2012/month=1/part-0.parquet;
+π 3/24;
+σ (col(&quot;month&quot;)) &lt;= (3) [(0, 2)]</title>
+<path fill="none" stroke="black" d="M218.75,-93.3C218.75,-82.05 218.75,-69.11 218.75,-57.84"/>
+</g>
+</g>
+</svg>
