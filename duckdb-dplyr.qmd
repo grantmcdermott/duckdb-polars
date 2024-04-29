@@ -173,7 +173,7 @@ dbDisconnect(con)
 
 ## Appendix: Related interfaces
 
-### arrow to duckdb
+### arrow+duckdb
 
 ```{r arrow_libs}
 library(arrow)
@@ -250,7 +250,7 @@ out the `to_duckdb()` line. For more details, see
 [here](https://youtu.be/LvTX1ZAZy6M?si=7gZYG03ojtAtPGfe).
 :::
 
-## duckplyr
+### duckplyr
 
 The new kid on the block is **duckplyr**
 ([announcement](https://duckdb.org/2024/04/02/duckplyr.html) /
