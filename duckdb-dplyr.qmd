@@ -1,5 +1,6 @@
 ---
-title: Hands on with DuckDB + dplyr
+title: DuckDB + dplyr (R)
+subtitle: Use a familiar R frontend
 execute:
   freeze: auto
   cache: true
@@ -35,6 +36,8 @@ con = dbConnect(duckdb(), shutdown = TRUE)
 nyc = tbl(con, "read_parquet('nyc-taxi/**/*.parquet', hive_partitioning = true)")
 ```
 
+## First example
+
 This next command runs instantly because all computation is deferred (i.e.,
 lazy eval). In other words, it is just a query object.
 
@@ -69,7 +72,7 @@ show_query(q1)
 
 Note that printing the query object actually does enforce some computation.
 OTOH it's still just a preview of the data (we haven't pulled everything into
-R's memory)
+R's memory).
 
 ```{r dbplyr_q1_print}
 q1

@@ -84,8 +84,8 @@ py -m venv .venv
 Then install the Python packages that we will be using.
 
 ```sh
-python3 -m pip install -U duckdb polars pyarrow pandas
-python3 -m pip install -U 'ibis-framework[duckdb,polars]'
+python3 -m pip install duckdb polars pyarrow pandas -U
+python3 -m pip install 'ibis-framework[duckdb,polars]' -U
 ```
 
 ::: {.callout-caution}
@@ -109,7 +109,7 @@ recommend install packages from within VS Code using
 i.e.
 
 ```{{py}}
-%pip install ipykernel jupyter
+%pip install ipykernel jupyter -U
 %pip install duckdb polars pyarrow pandas -U
 %pip install 'ibis-framework[duckdb,polars]' -U
 ```

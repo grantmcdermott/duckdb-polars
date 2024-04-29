@@ -1,5 +1,5 @@
 ---
-title: Hands on with DuckDB SQL
+title: DuckDB SQL
 subtitle: Use the same queries from R, Python, Julia...
 execute:
   freeze: auto
@@ -108,7 +108,7 @@ that it enables out-of-core computation for bigger than RAM data. See
 and performance considerations (which are still great).
 :::
 
-## Example query
+## First example
 
 We'll start with a simple aggregation query to get situated. I'll also use
 this example to highlight some general features of DuckDB SQL and

@@ -1,0 +1,161 @@
+---
+title: DuckDB + Ibis (Python)
+subtitle: Use a dplyr-esque Python frontend
+execute:
+  freeze: auto
+  cache: true
+---
+
+## Load libraries
+
+```{python db_ibis_import}
+#| cache: true
+
+import ibis
+import ibis.selectors as s
+from ibis import _
+# ibis.options.interactive = True # enforce eager execution of queries
+```
+
+## Connect and register
+
+```{python db_ibis_con}
+## Instantiate an in-memory DuckDB connection from Ibis
+con = ibis.duckdb.connect()
+
+## Register our parquet dataset as a table called "nyc" in our connection
+con.register("nyc-taxi/**/*.parquet", "nyc")
+```
+
+Aside: Remember that you can create a persistent, disk-backed database by giving it an
+appropriate name/path. This also enables out-of-core computation for bigger than RAM data.
+
+```py
+# con = ibis.duckdb.connect("nyc.dbb")
+# con.register("nyc-taxi/**/*.parquet", "nyc")
+# etc.
+```
+
+Reference the table from Python. We'll call this reference object `nyc` too for consistency, but you could call it whatever you want (e.g., you could call it `nyc_ibis` to avoid potential ambiguity with the "nyc" table in our actual DuckDB connection).
+Printing the object to screen will give us a lazy preview.
+
+```{python db_ibis_nyc}
+# con.list_tables() # Optional: confirm that our table is available
+
+nyc = con.table("nyc")
+nyc
+```
+
+## First example
+
+```{python db_ibis_q1}
+q1 = (
+  nyc
+  .group_by(["passenger_count"])
+  .agg(mean_tip = _.tip_amount.mean())
+)
+```
+
+To see the underlying SQL translation, use `ibis.to_sql()`  
+```{python db_ibis_q1_sql}
+ibis.to_sql(q1)
+```
+
+To actually execute the query and bring the result into Python, we can use the
+`execute()` method. By default this will coerce to a **pandas** DataFrame.
+
+```{python db_ibis_dat1}
+dat1 = q1.execute()
+dat1
+```
+
+:::{.callout-note}
+## Ibis conversion to polars
+
+The `q1.execute()` method above is equivalent calling `q1.to_pandas()`. A
+`q1.to_polars()` equivalent [has been
+added](https://github.com/ibis-project/ibis/pull/8478) to the dev version of
+Ibis, but is not available with the latest offical release (8.0.0 at the time of
+writing).
+:::
+
+### Digression: Interactive Ibis use and eager execution
+
+At the very top of this document, I commented out the `ibis.options.interactive`
+option as part of my Ibis configuration. This was because I wanted to
+demonstrate the default _deferred_ (i.e., lazy) behaviour of Ibis, which is just
+the same as **d(b)plyr** in R. If you are building data wrangling pipelines, or
+writing scripts with potentially complex queries, you probably want to
+preserve this deferred behaviour and avoid eager execution.
+
+_However_, there are times when you may want to default into eager execution. For example, if your dataset is of manageable size, or you are trying to iterate through different query operations... Or, you might just want to enable it so that you automatically get a nice print return object for your workshop materials. I'll adopt the latter view, so that I can quickly demonstrate some Ibis syntax and results for the rest of this document.
+
+```{python enable_interactive}
+#| cache: false
+ibis.options.interactive = True
+```
+
+Okay, let's speed through some of the same basic queries that we've already seen
+in the DuckDB SQL and R (dplyr) pages. I won't bother to explain them in depth.
+Just consider them for demonstration purposes.
+
+## Aggregation
+
+```{python db_ibis_q2}
+(
+  nyc
+  .group_by(["passenger_count", "trip_distance"])
+  .aggregate(
+    mean_tip = _.tip_amount.mean(),
+    mean_fare = _.fare_amount.mean()
+    )
+)
+```
+
+Note that, even though we have enabled the interactive print mode, we still get
+lazy evalation if we assign a chain of query steps to an object (here: `q3`)...
+
+```{python db_ibis_q3}
+q3 = (
+  nyc
+  .group_by(["passenger_count", "trip_distance"])
+  .agg(
+    mean_tip = _.tip_amount.mean(),
+    mean_fare = _.fare_amount.mean()
+    )
+)
+```
+
+... but printing the query to screen enforces computation.
+
+```{python db_ibis_q3_print}
+q3
+```
+
+## Pivot (reshape)
+
+```{python db_ibis_pivot}
+
+# now chain on pivoting (and enforce computation via printing)
+(
+  q3
+  .pivot_longer(s.r["mean_tip":"mean_fare"])
+)
+```
+
+## Joins (merges)
+
+(As we did in the **dplyr** code, we'll break this contrived join example into
+two steps)
+
+```{python db_ibis_pivot}
+mean_tips = nyc.group_by("month").agg(mean_tip = _.tip_amount.mean())
+mean_fares = nyc.group_by("month").agg(mean_fare = _.fare_amount.mean())
+```
+
+```{python db_ibis_pivot2}
+(
+  mean_tips
+  .left_join(mean_fares, "month")
+)
+```
