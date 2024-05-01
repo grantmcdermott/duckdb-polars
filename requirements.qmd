@@ -12,7 +12,7 @@ workshop starts!
 For this workshop, you have the option of following along in either R, Python,
 or both.  Ideally, I'd recommend both since one of my goals is to demonstrate
 the close equivalency in workflows across languages. But I'll leave that to
-you.^[If you're unsure and jsut want to pick one, then I recommend R. It's much
+you.^[If you're unsure and just want to pick one, then I recommend R. It's much
 easier to install and manage environments. Plus it's also my preferred language,
 so you're likely to get better support from me.]
 
