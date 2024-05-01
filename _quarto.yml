@@ -2,7 +2,6 @@ project:
   type: website
   render:
     - "*.qmd"
-    - "!py-polars.qmd"
 
 website:
   title: "DuckDB + Polars"

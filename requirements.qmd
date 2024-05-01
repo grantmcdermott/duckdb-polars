@@ -18,9 +18,9 @@ root of your local clone, using the following commands.
 git clone https://github.com/grantmcdermott/duckdb-polars.git
 cd duckdb-polars
 ```
-(If you can't clone the repo for some reason, don't worry. It's not a train
-smash. But you may need to adjust some relative file paths when you are calling
-the actual code chunks later in the workshop. We'll figure it out.) 
+(Don't worry if you can't clone the repo for some reason. You may need to adjust
+some relative file paths when you are calling the actual code chunks later in
+the workshop, but we'll figure it out.) 
 :::
 
 ## R and Python Packages
