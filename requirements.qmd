@@ -7,6 +7,22 @@ install some R and/or Python packages, as well as download a reasonably large
 dataset. Please make sure that you have completed all requirements before the
 workshop starts!
 
+:::{.callout-important}
+## Have you cloned the GitHub repo yet?
+
+My working assumption is that you have already cloned the
+[companion GitHub repo](https://github.com/grantmcdermott/duckdb-polars)
+to this website. If not, please do so before continuing and navigate to the
+root of your local clone, using the following commands.
+```sh
+git clone https://github.com/grantmcdermott/duckdb-polars.git
+cd duckdb-polars
+```
+(If you can't clone the repo for some reason, don't worry. It's not a train
+smash. But you may need to adjust some relative file paths when you are calling
+the actual code chunks later in the workshop. We'll figure it out.) 
+:::
+
 ## R and Python Packages
 
 For this workshop, you have the option of following along in either R, Python,
