@@ -103,7 +103,7 @@ variables...
 q2 = nyc |>
   filter(month <= 3) |>
   summarize(
-    across(c(tip_amount, fare_amount), mean),
+    across(c(tip_amount, fare_amount), \(x) mean(x)),
     .by = c(month, passenger_count)
   )
 q2
@@ -112,6 +112,8 @@ q2
 Aside: note the optimised query includes hash groupings and projection
 (basically: fancy column subsetting, which is a suprisingly effective strategy
 in query optimization)
+
+
 
 ```{r dbplyr_q2_explain}
 explain(q2)
@@ -124,10 +126,29 @@ first, since I'll reuse it shortly again
 q3 = nyc |>
   group_by(passenger_count, trip_distance) |>
   summarize(
-    across(c(tip_amount, fare_amount), mean),
+    across(c(tip_amount, fare_amount), \(x) mean(x)),
   ) 
 collect(q3)
 ```
+
+
+We can also do multiple things at once using familiar dplyr syntax
+
+
+```{r}
+q4 = nyc |>
+summarise(across(c(tip_amount, fare_amount), list(Median = \(x) median(x),
+                                                  Mean = \(x) mean(x),
+                                                  Max = \(x) max(x)),
+                                                  .names = '{.col}_{.fn}')) 
+
+collect(q4)                                                 
+
+
+```
+
+
+
 
 ## Pivot (reshape)
 
