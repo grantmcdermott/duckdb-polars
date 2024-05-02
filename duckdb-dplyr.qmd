@@ -10,12 +10,10 @@ execute:
 
 ```{r dbplyr_libs}
 #| cache: false
-#| message: false
-#| warning: false 
 
 library(duckdb)
-library(dplyr)
-library(tidyr)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
 ```
 
 ## Create a database connection
@@ -279,10 +277,7 @@ is still marked as experimental and has a few rough edges. But the basics are
 there. For example:
 
 ```{r duckplyr_q1}
-#| message: false
-#| warning: false
- 
-library(duckplyr)
+library(duckplyr, warn.conflicts = FALSE)
 
 duckplyr_df_from_parquet("nyc-taxi/**/*.parquet") |>
   summarise(
