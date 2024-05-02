@@ -1,0 +1,433 @@
+---
+title: Polars from Python and R
+subtitle: 'Pro-tip: Just swap `.` (Python) for `$` (R), or vice versa'
+execute:
+  freeze: auto
+  cache: true
+---
+
+```{r reticulate_config}
+#| cache: false
+#| include: false
+Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
+```
+
+## Load libraries
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_libs}
+#| cache: false
+import polars as pl
+import time
+import matplotlib
+```
+
+### R
+
+```{r pl_libs_r}
+#| cache: false
+
+library(polars)
+```
+
+:::
+
+## Scan data 
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_nyc}
+#| cache: false
+nyc = pl.scan_parquet("nyc-taxi/**/*.parquet")
+nyc
+```
+
+### R
+
+```{r pl_nyc_r}
+#| cache: false
+nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+nyc
+```
+:::
+
+## First example
+
+Polars operations are registered as queries until they are collected.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_q1}
+q1 = (
+    nyc
+    .group_by(["passenger_count"])
+    .agg([
+            pl.mean("tip_amount")#.alias("mean_tip") ## alias is optional
+        ])
+    .sort("passenger_count")
+)
+q1
+```
+
+### R
+
+```{r pl_q1_r}
+q1 = (
+    nyc
+    $group_by("passenger_count")
+    $agg(
+        pl$mean("tip_amount")#$alias("mean_tip") ## alias is optional
+    )
+    $sort("passenger_count")
+)
+q1
+```
+
+::::{.callout-note}
+## R-polars multiline syntax
+
+Polars-style `x$method1()$method2()...` chaining may seem a little odd to R users, especially for multiline queries. Here I have adopted the same general styling as Python: By enclosing the full query in parentheses `()`, we can start each `$method()` on a new line. If this isn't to your fancy, you could also rewrite these multiline queries as follows:
+
+```r
+nyc$group_by(
+    "passenger_count"
+)$agg(
+    pl$mean("tip_amount")
+)$sort("passenger_count")
+```
+::::
+
+:::
+
+(Note: this is the naive query plan, not the optimized query that **polars**
+will actually implement for us. We'll come back to this idea shortly.)
+
+Calling `collect()` enforces computation.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_dat1}
+tic = time.time()
+dat1 = q1.collect()
+toc = time.time()
+
+dat1
+# print(f"Time difference of {toc - tic} seconds")
+```
+
+### R
+
+```{r pl_dat1_r}
+tic = Sys.time()
+dat1 = q1$collect()
+toc = Sys.time()
+
+dat1
+toc - tic
+```
+
+:::
+
+## Aggregation
+
+Subsetting along partition dimensions allows for even more efficiency gains.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_q2}
+q2 = (
+    nyc
+    .filter(pl.col("month") <= 3)
+    .group_by(["month", "passenger_count"])
+    .agg([pl.mean("tip_amount").alias("mean_tip")])
+    .sort("passenger_count")
+)
+```
+
+### R
+
+```{r pl_q2_r}
+q2 = (
+    nyc
+    $filter(pl$col("month") <= 3)
+    $group_by("month", "passenger_count")
+    $agg(pl$mean("tip_amount")$alias("mean_tip"))
+    $sort("passenger_count")
+)
+```
+
+:::
+
+Let's take a look at the optimized query that Polars will implement for us.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_q2_show}
+# q2             # naive
+q2.show_graph()  # optimized
+```
+
+### R 
+
+```{r pl_q2_optimzed_r}
+q2$describe_optimized_plan()
+```
+
+:::
+
+Now, let's run the query and collect the results.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_dat2}
+tic = time.time()
+dat2 = q2.collect()
+toc = time.time()
+
+dat2
+# print(f"Time difference of {toc - tic} seconds")
+```
+
+### R
+
+```{r pl_dat2_r}
+tic = Sys.time()
+dat2 = q2$collect()
+toc = Sys.time()
+
+dat2
+toc - tic
+```
+
+:::
+
+High-dimensional grouping example.
+This query provides an example where **polars** is noticeably slower than
+DuckDB.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_dat}
+q3 = (
+    nyc
+    .group_by(["passenger_count", "trip_distance"])
+    .agg([
+        pl.mean("tip_amount").alias("mean_tip"),
+        pl.mean("fare_amount").alias("mean_fare"),
+        ])
+    .sort(["passenger_count", "trip_distance"])
+)
+
+tic = time.time()
+dat3 = q3.collect()
+toc = time.time()
+
+dat3
+# print(f"Time difference of {toc - tic} seconds")
+```
+
+### R
+
+```{r pl_dat_r}
+q3 = (
+    nyc
+    $group_by("passenger_count", "trip_distance")
+    $agg(
+        pl$mean("tip_amount")$alias("mean_tip"),
+        pl$mean("fare_amount")$alias("mean_fare")
+        )
+    $sort("passenger_count", "trip_distance")
+)
+
+tic = Sys.time()
+dat3 = q3$collect()
+toc = Sys.time()
+
+dat3
+toc - tic
+```
+
+:::
+
+As an aside, if we didn't care about column aliases (or sorting), then the previous query could be shortened to:
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```python
+(
+    nyc
+    .group_by(["passenger_count", "trip_distance"])
+    .agg(pl.col(["tip_amount", "fare_amount"]).mean())
+    .collect()
+)
+```
+
+### R
+
+```r
+(
+    nyc
+    $group_by("passenger_count", "trip_distance")
+    $agg(pl$col("tip_amount", "fare_amount")$mean())
+    $collect()
+)
+```
+
+:::
+
+## Pivot (reshape)
+
+In **polars**, we have two distinct reshape methods:
+
+- `pivot`: => long to wide
+- `melt`: => wide to long 
+
+Here we'll _melt_ to go from wide to long and use the eager execution engine
+(i.e., on the `dat3` DataFrame object that we've already computed) for
+expediency.
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_melt}
+dat3.melt(id_vars = ["passenger_count", "trip_distance"])
+```
+
+### R
+
+```{r pl_melt_r}
+dat3$melt(id_vars = c("passenger_count", "trip_distance"))
+```
+
+:::
+
+## Joins (merges)
+
+::: {.panel-tabset group="language"}
+
+### Python
+
+```{python pl_join0}
+mean_tips  = nyc.group_by("month").agg(pl.col("tip_amount").mean())
+mean_fares = nyc.group_by("month").agg(pl.col("fare_amount").mean())
+```
+
+```{python pl_join1}
+(
+    mean_tips
+    .join(
+        mean_fares,
+        on = "month",
+        how = "left" # default is inner join
+    )
+    .collect()
+)
+```
+
+### R
+
+```{r pl_join0_r}
+mean_tips  = nyc$group_by("month")$agg(pl$col("tip_amount")$mean())
+mean_fares = nyc$group_by("month")$agg(pl$col("fare_amount")$mean())
+```
+
+```{r pl_join1_r}
+(
+    mean_tips
+    $join(
+        mean_fares,
+        on = "month",
+        how = "left" # default is inner join
+    )
+    $collect()
+)
+```
+
+:::
+
+
+## Appendix: Alternate interfaces
+
+The native **polars** API is not the only way to interface with the underlying
+computation engine. Here are two alternate approaches that you may prefer,
+especially if you don't want to learn a new syntax.
+
+### Ibis (Python)
+
+The great advantage of **Ibis** (like **dbplyr**) is that it supports multiple
+backends through an identical frontend. So, all of our syntax logic and workflow
+from the Ibis+DuckDB section carry over to an equivalent Ibis+Polars workflow
+too. All you need to do is change the connection type. For example:
+
+```{python pl_ibis_example}
+import ibis
+import ibis.selectors as s
+from ibis import _
+
+##! This next line is the only thing that's changed !##
+con = ibis.polars.connect()
+
+con.register("nyc-taxi/**/*.parquet", "nyc")
+
+nyc = con.table("nyc")
+
+(
+  nyc
+  .group_by(["passenger_count"])
+  .agg(mean_tip = _.tip_amount.mean())
+  .execute()
+)
+```
+
+_Aside: Remember that you will be able to call `to_polars()` rather than
+`execute()` (which coerces to a pandas DataFrame) at the end, once Ibis
+[v9.0.0](https://ibis-project.org/release_notes#9.0.0) is released._
+
+### tidypolars (R)
+
+The **tidypolars** package ([link](https://www.tidypolars.etiennebacher.com/)) provides a "tidyverse" backend for **polars** from R. The syntax and workflow should thus be immediately familar to R users.
+
+It's important to note that **tidypolars** is _solely_ focused on the
+translation work. This means that you still need to load the main **polars**
+library alongside it for the actual computation, as well as **dplyr** (and
+potentially **tidyr**) for function generics.
+
+```{r pl_tidypolars_example_r}
+library(polars) ## Already loaded
+library(tidypolars)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+
+nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+
+nyc |> 
+    summarise(mean_tip = mean(tip_amount), .by = passenger_count) |>
+    compute()
+```
+
+_Aside: Use `collect()` instead of `compute()` at the end if you would prefer to
+return a standard R data.frame instead of a Polars DataFrame._
+
+See also **polarssql** ([link](https://rpolars.github.io/r-polarssql/)) if you
+would like yet another "tidyverse"-esque alternative that works through
+**DBI**/**d(b)plyr**.
