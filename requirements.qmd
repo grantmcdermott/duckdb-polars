@@ -42,13 +42,17 @@ Run the following commands in your R console.
 install.packages(c("duckdb", "arrow", "dplyr", "tidyr", "duckplyr"))
 ```
 
-We also have different install targets for **r-polars**, depending on your operating system.
+We also have different install targets for **r-polars**, depending on your
+operating system. Details
+[here](https://pola-rs.github.io/r-polars/vignettes/install.html).
 
 ```r
 ## MacOS / Windows
 install.packages("polars", repos = "https://rpolars.r-universe.dev")
+install.packages("tidypolars", repos = "https://etiennebacher.r-universe.dev")
 ## Ubuntu
 install.packages("polars", repos = "https://rpolars.r-universe.dev/bin/linux/jammy/4.4")
+install.packages("tidypolars", repos = "https://etiennebacher.r-universe.dev/bin/linux/jammy/4.3")
 ```
 
 :::{.callout-tip}

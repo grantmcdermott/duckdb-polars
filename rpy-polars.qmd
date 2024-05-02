@@ -364,3 +364,70 @@ mean_fares = nyc$group_by("month")$agg(pl$col("fare_amount")$mean())
 ```
 
 :::
+
+
+## Appendix: Alternate interfaces
+
+The native **polars** API is not the only way to interface with the underlying
+computation engine. Here are two alternate approaches that you may prefer,
+especially if you don't want to learn a new syntax.
+
+### Ibis (Python)
+
+The great advantage of **Ibis** (like **dbplyr**) is that it supports multiple
+backends through an identical frontend. So, all of our syntax logic and workflow
+from the Ibis+DuckDB section carry over to an equivalent Ibis+Polars workflow
+too. All you need to do is change the connection type. For example:
+
+```{python pl_ibis_example}
+import ibis
+import ibis.selectors as s
+from ibis import _
+
+##! This next line is the only thing that's changed !##
+con = ibis.polars.connect()
+
+con.register("nyc-taxi/**/*.parquet", "nyc")
+
+nyc = con.table("nyc")
+
+(
+  nyc
+  .group_by(["passenger_count"])
+  .agg(mean_tip = _.tip_amount.mean())
+  .execute()
+)
+```
+
+_Aside: Remember that you will be able to call `to_polars()` rather than
+`execute()` (which coerces to a pandas DataFrame) at the end, once Ibis
+[v9.0.0](https://ibis-project.org/release_notes#9.0.0) is released._
+
+### tidypolars (R)
+
+The **tidypolars** package ([link](https://www.tidypolars.etiennebacher.com/)) provides a "tidyverse" backend for **polars** from R. The syntax and workflow should thus be immediately familar to R users.
+
+It's important to note that **tidypolars** is _solely_ focused on the
+translation work. This means that you still need to load the main **polars**
+library alongside it for the actual computation, as well as **dplyr** (and
+potentially **tidyr**) for function generics.
+
+```{r pl_tidypolars_example_r}
+library(polars) ## Already loaded
+library(tidypolars)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+
+nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+
+nyc |> 
+    summarise(mean_tip = mean(tip_amount), .by = passenger_count) |>
+    compute()
+```
+
+_Aside: Use `collect()` instead of `compute()` at the end if you would prefer to
+return a standard R data.frame instead of a Polars DataFrame._
+
+See also **polarssql** ([link](https://rpolars.github.io/r-polarssql/)) if you
+would like yet another "tidyverse"-esque alternative that works through
+**DBI**/**d(b)plyr**.
