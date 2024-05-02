@@ -10,6 +10,8 @@ execute:
 
 ```{r dbplyr_libs}
 #| cache: false
+#| message: false
+#| warning: false 
 
 library(duckdb)
 library(dplyr)
@@ -179,6 +181,8 @@ dbDisconnect(con)
 ### arrow+duckdb
 
 ```{r arrow_libs}
+#| message: false
+#| warning: false
 library(arrow)
 library(duckdb) ## Already loaded
 library(dplyr)  ## Already loaded
@@ -275,6 +279,9 @@ is still marked as experimental and has a few rough edges. But the basics are
 there. For example:
 
 ```{r duckplyr_q1}
+#| message: false
+#| warning: false
+ 
 library(duckplyr)
 
 duckplyr_df_from_parquet("nyc-taxi/**/*.parquet") |>
