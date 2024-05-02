@@ -24,7 +24,6 @@ website:
       style: "docked"
       background: light
       contents:
-        - duckdb.qmd
         - duckdb-sql.qmd
         - duckdb-dplyr.qmd
         - duckdb-ibis.qmd
@@ -33,7 +32,6 @@ website:
       style: "docked"
       background: light
       contents:
-        - polars.qmd
         - rpy-polars.qmd
 
 format:
