@@ -2,38 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://grantmcdermott.github.io/duckdb-polars/rpy-polars.html</loc>
-    <lastmod>2024-05-01T05:16:42.039Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/polars.html</loc>
-    <lastmod>2024-05-01T05:16:42.039Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb.html</loc>
-    <lastmod>2024-05-01T05:16:42.038Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-ibis.html</loc>
-    <lastmod>2024-05-01T05:16:42.037Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/about.html</loc>
-    <lastmod>2024-05-01T05:16:42.036Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-dplyr.html</loc>
-    <lastmod>2024-05-01T05:16:42.037Z</lastmod>
-  </url>
-  <url>
-    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-sql.html</loc>
-    <lastmod>2024-05-01T05:16:42.037Z</lastmod>
+    <lastmod>2024-05-02T15:29:13.896Z</lastmod>
   </url>
   <url>
     <loc>https://grantmcdermott.github.io/duckdb-polars/index.html</loc>
-    <lastmod>2024-05-01T05:16:42.038Z</lastmod>
+    <lastmod>2024-05-02T15:31:16.707Z</lastmod>
+  </url>
+  <url>
+    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-ibis.html</loc>
+    <lastmod>2024-05-02T15:31:16.706Z</lastmod>
+  </url>
+  <url>
+    <loc>https://grantmcdermott.github.io/duckdb-polars/about.html</loc>
+    <lastmod>2024-05-02T15:31:16.705Z</lastmod>
+  </url>
+  <url>
+    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-dplyr.html</loc>
+    <lastmod>2024-05-02T15:29:13.895Z</lastmod>
+  </url>
+  <url>
+    <loc>https://grantmcdermott.github.io/duckdb-polars/duckdb-sql.html</loc>
+    <lastmod>2024-05-02T15:31:16.707Z</lastmod>
   </url>
   <url>
     <loc>https://grantmcdermott.github.io/duckdb-polars/requirements.html</loc>
-    <lastmod>2024-05-01T05:14:34.018Z</lastmod>
+    <lastmod>2024-05-02T15:29:13.895Z</lastmod>
   </url>
 </urlset>

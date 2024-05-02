@@ -136,10 +136,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-duckdb">    
         <li>
-    <a class="dropdown-item" href="./duckdb.html">
- <span class="dropdown-text">DuckDB intro</span></a>
-  </li>  
-        <li>
     <a class="dropdown-item" href="./duckdb-sql.html">
  <span class="dropdown-text">DuckDB SQL</span></a>
   </li>  
@@ -158,10 +154,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Polars</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-polars">    
-        <li>
-    <a class="dropdown-item" href="./polars.html">
- <span class="dropdown-text">Polars intro</span></a>
-  </li>  
         <li>
     <a class="dropdown-item" href="./rpy-polars.html">
  <span class="dropdown-text">Polars from Python and R</span></a>
@@ -241,11 +233,13 @@ Have you cloned the GitHub repo yet?
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <p>Run the following commands in your R console.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"duckdb"</span>, <span class="st">"arrow"</span>, <span class="st">"dplyr"</span>, <span class="st">"tidyr"</span>, <span class="st">"duckplyr"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We also have different install targets for <strong>r-polars</strong>, depending on your operating system.</p>
+<p>We also have different install targets for <strong>r-polars</strong>, depending on your operating system. Details <a href="https://pola-rs.github.io/r-polars/vignettes/install.html">here</a>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## MacOS / Windows</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"polars"</span>, <span class="at">repos =</span> <span class="st">"https://rpolars.r-universe.dev"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Ubuntu</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"polars"</span>, <span class="at">repos =</span> <span class="st">"https://rpolars.r-universe.dev/bin/linux/jammy/4.4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"tidypolars"</span>, <span class="at">repos =</span> <span class="st">"https://etiennebacher.r-universe.dev"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Ubuntu</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"polars"</span>, <span class="at">repos =</span> <span class="st">"https://rpolars.r-universe.dev/bin/linux/jammy/4.4"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"tidypolars"</span>, <span class="at">repos =</span> <span class="st">"https://etiennebacher.r-universe.dev/bin/linux/jammy/4.3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

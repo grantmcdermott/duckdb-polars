@@ -136,10 +136,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-duckdb">    
         <li>
-    <a class="dropdown-item" href="./duckdb.html">
- <span class="dropdown-text">DuckDB intro</span></a>
-  </li>  
-        <li>
     <a class="dropdown-item" href="./duckdb-sql.html">
  <span class="dropdown-text">DuckDB SQL</span></a>
   </li>  
@@ -158,10 +154,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Polars</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-polars">    
-        <li>
-    <a class="dropdown-item" href="./polars.html">
- <span class="dropdown-text">Polars intro</span></a>
-  </li>  
         <li>
     <a class="dropdown-item" href="./rpy-polars.html">
  <span class="dropdown-text">Polars from Python and R</span></a>
@@ -194,12 +186,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./polars.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Polars intro</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./rpy-polars.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Polars from Python and R</span></a>
   </div>
@@ -220,6 +206,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#aggregation" id="toc-aggregation" class="nav-link" data-scroll-target="#aggregation">Aggregation</a></li>
   <li><a href="#pivot-reshape" id="toc-pivot-reshape" class="nav-link" data-scroll-target="#pivot-reshape">Pivot (reshape)</a></li>
   <li><a href="#joins-merges" id="toc-joins-merges" class="nav-link" data-scroll-target="#joins-merges">Joins (merges)</a></li>
+  <li><a href="#appendix-alternate-interfaces" id="toc-appendix-alternate-interfaces" class="nav-link" data-scroll-target="#appendix-alternate-interfaces">Appendix: Alternate interfaces</a>
+  <ul class="collapse">
+  <li><a href="#ibis-python" id="toc-ibis-python" class="nav-link" data-scroll-target="#ibis-python">Ibis (Python)</a></li>
+  <li><a href="#tidypolars-r" id="toc-tidypolars-r" class="nav-link" data-scroll-target="#tidypolars-r">tidypolars (R)</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1232,8 +1223,122 @@ R-polars multiline syntax
 </div>
 </div>
 </div>
+</section>
+<section id="appendix-alternate-interfaces" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-alternate-interfaces">Appendix: Alternate interfaces</h2>
+<p>The native <strong>polars</strong> API is not the only way to interface with the underlying computation engine. Here are two alternate approaches that you may prefer, especially if you don’t want to learn a new syntax.</p>
+<section id="ibis-python" class="level3">
+<h3 class="anchored" data-anchor-id="ibis-python">Ibis (Python)</h3>
+<p>The great advantage of <strong>Ibis</strong> (like <strong>dbplyr</strong>) is that it supports multiple backends through an identical frontend. So, all of our syntax logic and workflow from the Ibis+DuckDB section carry over to an equivalent Ibis+Polars workflow too. All you need to do is change the connection type. For example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ibis</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ibis.selectors <span class="im">as</span> s</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibis <span class="im">import</span> _</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="co">##! This next line is the only thing that's changed !##</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> ibis.polars.<span class="ex">connect</span>()</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>con.register(<span class="st">"nyc-taxi/**/*.parquet"</span>, <span class="st">"nyc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DatabaseTable: nyc
+  vendor_name           string
+  pickup_datetime       timestamp
+  dropoff_datetime      timestamp
+  passenger_count       int64
+  trip_distance         float64
+  pickup_longitude      float64
+  pickup_latitude       float64
+  rate_code             string
+  store_and_fwd         string
+  dropoff_longitude     float64
+  dropoff_latitude      float64
+  payment_type          string
+  fare_amount           float64
+  extra                 float64
+  mta_tax               float64
+  tip_amount            float64
+  tolls_amount          float64
+  total_amount          float64
+  improvement_surcharge float64
+  congestion_surcharge  float64
+  pickup_location_id    int64
+  dropoff_location_id   int64
+  year                  int64
+  month                 int64</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>nyc <span class="op">=</span> con.table(<span class="st">"nyc"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  nyc</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  .group_by([<span class="st">"passenger_count"</span>])</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  .agg(mean_tip <span class="op">=</span> _.tip_amount.mean())</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  .execute()</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    passenger_count  mean_tip
+0                 3  0.962949
+1                 9  0.806800
+2                 0  0.862099
+3                 6  1.128365
+4                66  1.500000
+5               254  0.000000
+6                 1  1.151011
+7                 7  0.544118
+8                 4  0.844519
+9                10  0.000000
+10              177  1.000000
+11              249  0.000000
+12                2  1.081580
+13                5  1.102732
+14                8  0.350769
+15               65  0.000000
+16              208  0.000000
+17              247  2.300000</code></pre>
+</div>
+</div>
+<p><em>Aside: Remember that you will be able to call <code>to_polars()</code> rather than <code>execute()</code> (which coerces to a pandas DataFrame) at the end, once Ibis <a href="https://ibis-project.org/release_notes#9.0.0">v9.0.0</a> is released.</em></p>
+</section>
+<section id="tidypolars-r" class="level3">
+<h3 class="anchored" data-anchor-id="tidypolars-r">tidypolars (R)</h3>
+<p>The <strong>tidypolars</strong> package (<a href="https://www.tidypolars.etiennebacher.com/">link</a>) provides a “tidyverse” backend for <strong>polars</strong> from R. The syntax and workflow should thus be immediately familar to R users.</p>
+<p>It’s important to note that <strong>tidypolars</strong> is <em>solely</em> focused on the translation work. This means that you still need to load the main <strong>polars</strong> library alongside it for the actual computation, as well as <strong>dplyr</strong> (and potentially <strong>tidyr</strong>) for function generics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polars) <span class="do">## Already loaded</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidypolars)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>nyc <span class="ot">=</span> pl<span class="sc">$</span><span class="fu">scan_parquet</span>(<span class="st">"nyc-taxi/**/*.parquet"</span>)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>nyc <span class="sc">|&gt;</span> </span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount), <span class="at">.by =</span> passenger_count) <span class="sc">|&gt;</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">compute</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>shape: (18, 2)
+┌─────────────────┬──────────┐
+│ passenger_count ┆ mean_tip │
+│ ---             ┆ ---      │
+│ i64             ┆ f64      │
+╞═════════════════╪══════════╡
+│ 0               ┆ 0.862099 │
+│ 3               ┆ 0.962949 │
+│ 9               ┆ 0.8068   │
+│ 6               ┆ 1.128365 │
+│ 66              ┆ 1.5      │
+│ …               ┆ …        │
+│ 8               ┆ 0.350769 │
+│ 2               ┆ 1.08158  │
+│ 65              ┆ 0.0      │
+│ 208             ┆ 0.0      │
+│ 247             ┆ 2.3      │
+└─────────────────┴──────────┘</code></pre>
+</div>
+</div>
+<p><em>Aside: Use <code>collect()</code> instead of <code>compute()</code> at the end if you would prefer to return a standard R data.frame instead of a Polars DataFrame.</em></p>
+<p>See also <strong>polarssql</strong> (<a href="https://rpolars.github.io/r-polarssql/">link</a>) if you would like yet another “tidyverse”-esque alternative that works through <strong>DBI</strong>/<strong>d(b)plyr</strong>.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
