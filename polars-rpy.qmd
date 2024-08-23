@@ -395,13 +395,9 @@ nyc = con.table("nyc")
   nyc
   .group_by(["passenger_count"])
   .agg(mean_tip = _.tip_amount.mean())
-  .execute()
+  .to_polars()
 )
 ```
-
-_Aside: Remember that you will be able to call `to_polars()` rather than
-`execute()` (which coerces to a pandas DataFrame) at the end, once Ibis
-[v9.0.0](https://ibis-project.org/release_notes#9.0.0) is released._
 
 ### tidypolars (R)
 

@@ -12,6 +12,7 @@ website:
       - href: index.qmd
         text: Home
       - requirements.qmd
+      - sidebar:slides
       - sidebar:duckdb
       - sidebar:polars
     tools:
@@ -19,6 +20,12 @@ website:
         href:  https://github.com/grantmcdermott/duckdb-polars
         
   sidebar:
+    - id: slides
+      title: "Slides"
+      style: "docked"
+      background: light
+      contents:
+        - slides/slides.qmd
     - id: duckdb
       title: "DuckDB"
       style: "docked"
@@ -32,7 +39,7 @@ website:
       style: "docked"
       background: light
       contents:
-        - rpy-polars.qmd
+        - polars-rpy.qmd
 
 format:
   html:

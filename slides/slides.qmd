@@ -1,0 +1,340 @@
+---
+title: (Pretty) big data wrangling with DuckDB and Polars
+subtitle: With examples in R and Python
+format:
+  clean-revealjs:
+    self-contained: true
+author:
+  - name: Grant McDermott
+    url: https://grantmcdermott.com/duckdb-polars
+    email: gmcd@amazon.com
+    affiliations:
+      - Principal Economist, Amazon
+    orcid: 0000-0001-7883-8573
+date: May 1, 2024
+# date: last-modified
+---
+
+## Preliminaries
+
+### Agenda and expectations
+
+These sparse slides are mostly intended to serve as a rough guide map.
+
+- Most of what we'll be doing is live coding and working through examples.
+- I _strongly_ encourage you try these examples on you own machines. Laptops are perfectly fine. 
+
+**Note:** All of the material for today's workshop are available on my website:
+
+- **<https://grantmcdermott.com/duckdb-polars>**
+
+## Preliminaries
+
+### Requirements
+
+**Important:** Before continuing, please make sure that you have completed the
+[requirements](https://grantmcdermott.com/duckdb-polars/requirements.html)
+listed on the workshop website.
+
+- Install the required R and/or Python libraries.
+- Download some NYC taxi data.
+
+The data download step can take 15-20 minutes, depending on your internet
+connection.
+
+## Problem statement 
+### Why this workshop?
+
+It's a trope, but "big data" is everywhere. This is true whether you work in tech (like I do now), or in academic research (like I used to).
+
+OTOH many of datasets that I find myself working with aren't at the scale of truly _huge_ data that might warrant a Spark cluster.
+
+- We're talking anywhere between 100 MB to 50 GB. (Max a few billion rows; often in the millions or less.)
+- Can I do my work without the pain of going through Spark?
+
+Another factor is working in polyglot teams. It would be great to repurpose similar syntax and libraries across languages...
+
+
+## Taster
+### DuckDB example
+
+```{r}
+#| cache: true
+#| echo: true
+
+library(duckdb)
+library(arrow)
+library(dplyr)
+
+nyc = open_dataset(here::here("taxi-data"))
+prettyNum(nrow(nyc), ",")
+
+tic = Sys.time()
+
+nyc_summ = nyc |>
+  to_duckdb() |>
+  summarise(
+    mean_tip = mean(tip_amount),
+    .by = passenger_count
+  ) |> 
+  collect()
+
+(toc = Sys.time() - tic)
+```
+
+## Taster
+### DuckDB example (cont.)
+
+We just read a ~180 million row dataset (from disk!) and did a group-by aggregation on it. 
+
+In < 1 second. 
+
+On a laptop.
+
+🤯
+
+:::{.fragment}
+<br>
+Let's do a quick horesrace comparison (similar grouped aggregation, but on a slightly smaller dataset)...
+:::
+
+## Simple benchmark: Computation time only
+### DuckDB and Polars are already plenty fast...
+```{r collapse_benchamrks}
+#| include: false
+
+library(data.table)
+library(ggh4x)
+library(grid)
+library(forcats)
+library(showtext)
+showtext_auto()
+
+theme_set(
+    theme_get() + theme(text = element_text(family = "Roboto Condensed"))
+)
+# okabeito = c('#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#999999', '#000000')
+okabeito2 = c('#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#999999', '#000000')
+options(ggplot2.discrete.fill = okabeito2)
+options(ggplot2.discrete.colour = okabeito2)
+
+lang = c(
+    # "acero"          = "Multi",
+    "DuckDB"         = "Multi",
+    "polars"         = "Multi",
+    "collapse-r"     = "R",
+    "data.table"     = "R",
+    "dplyr"          = "R",
+    "pandas"         = "Python",
+    "DataFrames.jl"  = "Julia",
+    "gcollapse"      = "Stata/MP",
+    "collapse-stata" = "Stata/MP"
+)
+lang = as.data.table(lang, keep.rownames = "sw")
+
+io = c(
+    # "acero"          = 0,
+    "DuckDB"         = 0,
+    "polars"         = 0.001552,
+    "collapse-r"     = 7.739401,
+    "data.table"     = 7.739401 + 11.65877, # read + setDT
+    "dplyr"          = 7.739401,
+    "pandas"         = 8.280691,
+    "DataFrames.jl"  = 97.671830676,
+    "gcollapse"      = 5.2020,
+    "collapse-stata" = 5.2020
+)
+io = as.data.table(io, keep.rownames = "sw")
+
+q1 = c(
+    # "acero"          = 0.231185,
+    "DuckDB"         = 0.172184,
+    "polars"         = 0.373402,
+    "collapse-r"     = 0.358984,
+    "data.table"     = 1.297933,
+    "dplyr"          = 2.84693,
+    "pandas"         = 1.626898,
+    "DataFrames.jl"  = 2.597390579,
+    "gcollapse"      = 20.7530, # 10.9960 w/out preserve/restore
+    "collapse-stata" = 19.6180  # 10.0620 w/out preserve/restore
+)
+q1 = as.data.table(q1, keep.rownames = "sw")
+
+db = merge(merge(io, q1), lang)
+db[, tot := io + q1][]
+```
+```{r benchmark_plot1}
+#| echo: false
+
+ggplot(db, aes(fct_reorder(sw, q1), q1, fill = fct_reorder(lang, -q1))) +
+    geom_col() +
+    coord_flip() +
+    labs(
+        y = "Seconds", x = NULL,
+        fill = "Language",
+        title = "Task: Simple mean aggregation",
+        subtitle = "(Mean tip amount by passenger count)",
+        caption = paste(
+            "Details:",
+            "\nDataset comprises 3 months of NYC TLC taxi data (~45 million rows).",
+            "\nBenchmarks use latest available vers. of all SW as of 2024-05-01, incl. Stata/MP 18 (16-core license)."
+        )
+    ) +
+    # theme(legend.title = element_blank()) +
+    guides(x = "axis_truncated", y = "axis_truncated")
+# add circles around labels
+grid.circle(
+    x=0.06, y=0.225, r=0.05, default.units="npc", name=NULL,
+    gp=gpar(fill = NA, col = okabeito2[5], lwd = 2),
+    draw=TRUE, vp=NULL
+)
+grid.circle(
+    x=0.06, y=0.375, r=0.05, default.units="npc", name=NULL,
+    gp=gpar(fill = NA, col = okabeito2[5], lwd = 2),
+    draw=TRUE, vp=NULL
+)
+```
+
+## Simple benchmark: Computation time + data I/O
+### ... but are even more impressive once we account for data import times
+
+```{r benchmark_plot2}
+#| echo: false
+ 
+ggplot(db, aes(fct_reorder(sw, q1), tot)) +
+    geom_col() +
+    geom_col(aes(y = q1, fill = fct_reorder(lang, -q1))) +
+    coord_flip() + #scale_y_log10() +
+    labs(
+        y = "Seconds", x = NULL,
+        fill = "Language",
+        title = "Task: Simple mean aggregation + Including data I/O (charcoal fill)",
+        subtitle = "(Mean tip amount by passenger count)",
+        caption = paste(
+            "Details:",
+            "\nDataset comprises 3 months of NYC TLC taxi data (~45 million rows).",
+            "\nBenchmarks use latest available vers. of all SW as of 2024-05-01, incl. Stata/MP 18 (16-core license)."
+        )
+    ) +
+    # theme(legend.title = element_blank()) +
+    guides(x = "axis_truncated", y = "axis_truncated") +
+    annotate(
+        "curve", x = 1.7, xend = 3, y = 28-10, yend = 2.5,
+        arrow = arrow(angle = 30, length = unit(0.1, "inches"), type = "closed"),
+        colour = okabeito2[5],
+        curvature = 0.3
+    ) + 
+    annotate(
+        "curve", x = 1.25, xend = 1, y = 26-10, yend = 2,
+        arrow = arrow(angle = 30, length = unit(0.1, "inches"), type = "closed"),
+        colour = okabeito2[5],
+        curvature = -0.1
+    ) + 
+    annotate(
+        "text", x = 1.25, y = 27-10, hjust = 0, vjust = 0,
+        label = "No data I/O cost!",
+        colour = okabeito2[5],
+    )
+```
+
+## Wait. How??
+### Better disk storage 🤝 Better memory representation
+
+Two coinciding (r)evolutions enable faster, smarter computation:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+#### 1. Better on-disk storage
+
+- Mainly talking about the [Parquet](https://parquet.apache.org/) file format here.
+- Columnar storage format allows better compression (much smaller footprint) and efficient random access to selected rows or columns (don't have to read the whole dataset _a la_ CSVs).
+
+:::
+
+::: {.column width="50%"}
+
+#### 2. Better in-memory representation
+
+- Standardisation around the [Apache Arrow](https://arrow.apache.org/) format + columnar representation. (Allows zero copy, fewer cache misses, etc.)
+- [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing) + deferred [materialisation](https://en.wikipedia.org/wiki/Materialized_view). (Rather than "eagerly" executing each query step, we can be "lazy" and optimise queries before executing them.)
+
+:::
+
+::::
+
+## Scaling up
+### Even moar benchmarks
+
+**Question:** Do these benchmarks hold and scale more generally? **Answer:** Yes. See [_Database-like ops benchmark_](https://duckdblabs.github.io/db-benchmark/){preview-link="true"}.
+
+Moreover---and I think this is key---these kinds of benchmarks normally exclude the data I/O component... and the associated benefits of not having to hold the whole dataset in RAM.
+
+- There are some fantastically fast in-memory data wrangling libraries out there. (My personal faves: [data.table](https://github.com/Rdatatable/data.table) and [collapse](https://github.com/SebKrantz/collapse).) But "in-memory" means that you always have to keep the full dataset in, well, memory. And this can be expensive.
+- Libraries like DuckDB and Polars sidestep this problem, effectively supercharging your computer's data wrangling powers.
+
+
+## Examples
+### Live coding sessions
+
+Let's head back to the website to work through some notebooks.
+
+#### DuckDB
+
+ - [DuckDB SQL](../duckdb-sql.qmd)
+ - [DuckDB + dplyr (R)](../duckdb-dplyr.qmd)
+ - [DuckDB + Ibis (Python)](../duckdb-ibis.qmd)
+
+#### Polars
+
+ - [Polars from R and Python](../polars-rpy.qmd)
+
+## What didn't we cover?
+### Other cool features
+
+- **S3 I/O**
+    - DuckDB & Polars can both read/write directly from/to S3. You just need to provision your AWS credentials. [Ex. [1](https://drive-render.corp.amazon.com/view/gmcd@/codebook/devdesk.html#sec-rs3), [2](https://cboettig.github.io/duckdbfs/), [3](https://medium.com/@louis_10840/how-to-process-data-stored-in-amazon-s3-using-polars-2305bf064c52)]
+    - Note: I prefer/recommend the workflow we practiced today---first download to local disk via `aws cli`---to avoid network + I/O latency.
+
+- **Geospatial** 
+    - IMO the next iteration of geospatial computation will be built on top of the tools we've seen today (and related libs).
+    - DuckDB provides an excellent [spatial extension](https://github.com/duckdblabs/duckdb_spatial) (works with [dplyr](https://cboettig.github.io/duckdbfs/)). See also the [GeoParquet](https://geoparquet.org/), [GeoArrow](https://geoarrow.org/), & [GeoPolars](https://geopolars.org/latest/) initiatives.
+
+## What didn't we cover?
+### Other cool features (cont.)
+
+- **Streaming**
+    - [Streaming](https://pola-rs.github.io/polars-book/user-guide/concepts/streaming/) is the feature that enables working with bigger-than-RAM data.
+    - Very easy to use and/or adjust our workflow to these cases...
+    - DuckDB: Simply specify a disk-backed database when you first fire up your connection from Python or R, e.g.
+    ```r
+    con = dbConnect(duckdb(), dbdir = "nyc.dbb")
+    ```
+    - Polars: Simply specify streaming when collecting, e.g.
+    ```py
+    some_query.collect(streaming=True)
+    ```
+
+## What didn't we cover?
+### Other cool features (cont.)
+
+- **Modeling**
+  - The modeling part of this workflow is less tightly integrated b/c we generally have to bring the data into RAM.
+  - But being able to quickly I/O parts of large datasets makes it very easy to iteratively run analyses on subsets of your data. E.g., I typically pair with [**fixest**](https://lrberge.github.io/fixest/) for unmatched performance on high-dimensional data.
+  - You can also run bespoke models via UDFs and/or predictions on database backends. [Ex. [1](https://duckdb.org/2023/07/07/python-udf.html), [2](https://posit-conf-2023.github.io/arrow/materials/4_data_manipulation_2.html#/user-defined-functions-aka-udfs), [3](https://tidypredict.tidymodels.org/)]
+  - FWIW I believe that the underlying matrix and linear algebra libraries for _direct_ modeling with these tools are coming. [Ex. [1](https://arrow.apache.org/docs/cpp/api/tensor.html), [2](https://substrait.io/extensions/functions_arithmetic/)]
+
+## Resources
+### Learning more
+
+#### DuckDB
+
+- [DuckDB homepage](https://duckdb.org/). Includes a very informative [blog](https://duckdb.org/news/) and standalone documentation for the client APIs ([Python](https://duckdb.org/docs/archive/0.8.1/api/python/overview), [R](https://duckdb.org/docs/api/r.html), and many others).
+- Also check out [Harlequin](https://harlequin.sh/) for a cool, shell-based DuckDB IDE.
+
+#### Polars
+
+- [Polars GitHub Repo](https://github.com/pola-rs/polars). Contains links to the standalone documentation for the client APIS ([Python](https://pola-rs.github.io/polars/py-polars/html/reference/index.html), [R](https://rpolars.github.io/index.html), etc.)
+- Side-by-side code comparisons (versus pandas, dplyr, etc.) are available in [*Modern Polars (in Python)*](https://kevinheavey.github.io/modern-polars/) and [*Codebook for Polars in R*](https://ddotta.github.io/cookbook-rpolars/).
+
