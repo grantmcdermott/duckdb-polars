@@ -48,11 +48,10 @@ operating system. Details
 
 ```r
 ## MacOS / Windows
-install.packages("polars", repos = "https://rpolars.r-universe.dev")
-install.packages("tidypolars", repos = "https://etiennebacher.r-universe.dev")
+install.packages(c("polars", "tidypolars"),repos = "https://community.r-multiverse.org")
+
 ## Ubuntu
-install.packages("polars", repos = "https://rpolars.r-universe.dev/bin/linux/jammy/4.4")
-install.packages("tidypolars", repos = "https://etiennebacher.r-universe.dev/bin/linux/jammy/4.3")
+install.packages(c("polars", "tidypolars"),repos = "https://community.r-multiverse.org/bin/linux/noble/4.4")
 ```
 
 :::{.callout-tip}
