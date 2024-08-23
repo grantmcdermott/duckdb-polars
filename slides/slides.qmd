@@ -11,10 +11,10 @@ author:
     affiliations:
       - Principal Economist, Amazon
     orcid: 0000-0001-7883-8573
-execute: 
-  cache: true
 date: May 1, 2024
 # date: last-modified
+execute: 
+  cache: true
 ---
 
 ## Preliminaries
