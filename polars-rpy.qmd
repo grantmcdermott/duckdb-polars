@@ -299,9 +299,9 @@ As an aside, if we didn't care about column aliases (or sorting), then the previ
 In **polars**, we have two distinct reshape methods:
 
 - `pivot`: => long to wide
-- `melt`: => wide to long 
+- `unpivot`: => wide to long 
 
-Here we'll _melt_ to go from wide to long and use the eager execution engine
+Here we'll _unpivot_ to go from wide to long and use the eager execution engine
 (i.e., on the `dat3` DataFrame object that we've already computed) for
 expediency.
 
@@ -309,14 +309,14 @@ expediency.
 
 ### Python
 
-```{python pl_melt}
-dat3.melt(id_vars = ["passenger_count", "trip_distance"])
+```{python pl_unpivot}
+dat3.unpivot(id_vars = ["passenger_count", "trip_distance"])
 ```
 
 ### R
 
-```{r pl_melt_r}
-dat3$melt(id_vars = c("passenger_count", "trip_distance"))
+```{r pl_unpivot_r}
+dat3$unpivot(id_vars = c("passenger_count", "trip_distance"))
 ```
 
 :::
