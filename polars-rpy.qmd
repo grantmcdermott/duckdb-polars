@@ -10,6 +10,7 @@ execute:
 #| cache: false
 #| include: false
 Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
+options(polars.df_knitr_print = "html")
 ```
 
 ## Load libraries
@@ -29,7 +30,6 @@ import matplotlib
 
 ```{r pl_libs_r}
 #| cache: false
-
 library(polars)
 ```
 
@@ -43,7 +43,7 @@ library(polars)
 
 ```{python pl_nyc}
 #| cache: false
-nyc = pl.scan_parquet("nyc-taxi/**/*.parquet")
+nyc = pl.scan_parquet("nyc-taxi/**/*.parquet", hive_partitioning=True)
 nyc
 ```
 
@@ -51,7 +51,7 @@ nyc
 
 ```{r pl_nyc_r}
 #| cache: false
-nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+nyc = pl$scan_parquet("nyc-taxi/**/*.parquet", hive_partitioning=TRUE)
 nyc
 ```
 :::
@@ -224,7 +224,7 @@ DuckDB.
 
 ### Python
 
-```{python pl_dat}
+```{python pl_dat3}
 q3 = (
     nyc
     .group_by(["passenger_count", "trip_distance"])
@@ -234,7 +234,7 @@ q3 = (
         ])
     .sort(["passenger_count", "trip_distance"])
 )
-
+ 
 tic = time.time()
 dat3 = q3.collect()
 toc = time.time()
@@ -245,7 +245,7 @@ dat3
 
 ### R
 
-```{r pl_dat_r}
+```{r pl_dat3_r}
 q3 = (
     nyc
     $group_by("passenger_count", "trip_distance")
@@ -310,13 +310,15 @@ expediency.
 ### Python
 
 ```{python pl_unpivot}
-dat3.unpivot(id_vars = ["passenger_count", "trip_distance"])
+#| dependson: pl_dat3
+dat3.unpivot(index = ["passenger_count", "trip_distance"])
 ```
 
 ### R
 
 ```{r pl_unpivot_r}
-dat3$unpivot(id_vars = c("passenger_count", "trip_distance"))
+#| dependson: pl_dat3_r
+dat3$unpivot(index = c("passenger_count", "trip_distance"))
 ```
 
 :::
