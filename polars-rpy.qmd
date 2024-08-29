@@ -403,7 +403,7 @@ nyc = con.table("nyc")
 
 ### tidypolars (R)
 
-The **tidypolars** package ([link](https://www.tidypolars.etiennebacher.com/)) provides a "tidyverse" backend for **polars** from R. The syntax and workflow should thus be immediately familar to R users.
+The R package **tidypolars** ([link](https://www.tidypolars.etiennebacher.com/)) provides the "tidyverse" syntax while using **polars** as backend. The syntax and workflow should thus be immediately familar to R users.
 
 It's important to note that **tidypolars** is _solely_ focused on the
 translation work. This means that you still need to load the main **polars**
