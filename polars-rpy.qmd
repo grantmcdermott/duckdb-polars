@@ -416,7 +416,7 @@ library(tidypolars)
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 
-nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+nyc = scan_parquet_polars("nyc-taxi/**/*.parquet")
 
 nyc |> 
     summarise(mean_tip = mean(tip_amount), .by = passenger_count) |>
