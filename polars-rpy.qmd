@@ -183,7 +183,7 @@ q2.show_graph()  # optimized
 ### R 
 
 ```{r pl_q2_optimzed_r}
-q2$describe_optimized_plan()
+q2$explain()
 ```
 
 :::
