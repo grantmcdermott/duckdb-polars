@@ -51,6 +51,8 @@ Sys.setenv(NOT_CRAN = "true")
 install.packages(c("polars", "tidypolars"), repos = "https://community.r-multiverse.org")
 ```
 
+Note that you will need `polars` >= 0.19.1 and `tidypolars` >= 0.10.1.
+
 :::{.callout-tip}
 ## R package binaries for Linux
 
