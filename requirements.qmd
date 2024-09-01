@@ -42,17 +42,16 @@ Run the following commands in your R console.
 install.packages(c("duckdb", "arrow", "dplyr", "tidyr", "duckplyr"))
 ```
 
-We also have different install targets for **r-polars**, depending on your
-operating system. Details
+**polars** (and therefore **tidypolars**) are not on CRAN so we install them from
+R-universe. Details
 [here](https://pola-rs.github.io/r-polars/vignettes/install.html).
 
 ```r
-## MacOS / Windows
-install.packages(c("polars", "tidypolars"),repos = "https://community.r-multiverse.org")
-
-## Ubuntu
-install.packages(c("polars", "tidypolars"),repos = "https://community.r-multiverse.org/bin/linux/noble/4.4")
+Sys.setenv(NOT_CRAN = "true")
+install.packages(c("polars", "tidypolars"), repos = "https://community.r-multiverse.org")
 ```
+
+Note that you will need `polars` >= 0.19.1 and `tidypolars` >= 0.10.1.
 
 :::{.callout-tip}
 ## R package binaries for Linux

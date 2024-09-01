@@ -183,7 +183,7 @@ q2.show_graph()  # optimized
 ### R 
 
 ```{r pl_q2_optimzed_r}
-q2$describe_optimized_plan()
+cat(q2$explain())
 ```
 
 :::
@@ -416,7 +416,7 @@ library(tidypolars)
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 
-nyc = pl$scan_parquet("nyc-taxi/**/*.parquet")
+nyc = scan_parquet_polars("nyc-taxi/**/*.parquet")
 
 nyc |> 
     summarise(mean_tip = mean(tip_amount), .by = passenger_count) |>
