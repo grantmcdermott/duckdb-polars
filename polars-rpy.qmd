@@ -87,7 +87,7 @@ q1 = (
     )
     $sort("passenger_count")
 )
-q1
+q1 
 ```
 
 ::::{.callout-note}
@@ -127,6 +127,7 @@ dat1
 ### R
 
 ```{r pl_dat1_r}
+#| dependson: pl_q1_r
 tic = Sys.time()
 dat1 = q1$collect()
 toc = Sys.time()
@@ -164,7 +165,7 @@ q2 = (
     $group_by("month", "passenger_count")
     $agg(pl$mean("tip_amount")$alias("mean_tip"))
     $sort("passenger_count")
-)
+) 
 ```
 
 :::
@@ -182,8 +183,10 @@ q2.show_graph()  # optimized
 
 ### R 
 
-```{r pl_q2_optimzed_r}
-cat(q2$explain())
+```{r pl_q2_expain_r}
+#| dependson: pl_q2_r
+# q2              # naive
+cat(q2$explain()) # optimized
 ```
 
 :::
@@ -206,6 +209,7 @@ dat2
 ### R
 
 ```{r pl_dat2_r}
+#| dependson: pl_q2_r
 tic = Sys.time()
 dat2 = q2$collect()
 toc = Sys.time()
@@ -234,7 +238,7 @@ q3 = (
         ])
     .sort(["passenger_count", "trip_distance"])
 )
- 
+
 tic = time.time()
 dat3 = q3.collect()
 toc = time.time()
@@ -259,7 +263,7 @@ q3 = (
 tic = Sys.time()
 dat3 = q3$collect()
 toc = Sys.time()
-
+ 
 dat3
 toc - tic
 ```
@@ -359,7 +363,7 @@ mean_fares = nyc$group_by("month")$agg(pl$col("fare_amount")$mean())
     $join(
         mean_fares,
         on = "month",
-        how = "left" # default is inner join
+        how = "left"  # default is inner join
     )
     $collect()
 )
