@@ -121,7 +121,7 @@ dat1 = q1.collect()
 toc = time.time()
 
 dat1
-# print(f"Time difference of {toc - tic} seconds")
+print(f"Time difference of {toc - tic} seconds")
 ```
 
 ### R
@@ -203,7 +203,7 @@ dat2 = q2.collect()
 toc = time.time()
 
 dat2
-# print(f"Time difference of {toc - tic} seconds")
+print(f"Time difference of {toc - tic} seconds")
 ```
 
 ### R
@@ -244,7 +244,7 @@ dat3 = q3.collect()
 toc = time.time()
 
 dat3
-# print(f"Time difference of {toc - tic} seconds")
+print(f"Time difference of {toc - tic} seconds")
 ```
 
 ### R
