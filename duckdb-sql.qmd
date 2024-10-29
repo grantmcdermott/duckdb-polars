@@ -6,10 +6,95 @@ execute:
   cache: true
 ---
 
+## What is a Database?
+
+You can think of a database as a collection of tables (or dataframes). In general, the benefit of databases is that they can handle very large amounts of data - data which would not fit in your computer's RAM. As such, most databases are stored on a hard disk, from where data is read and written to. 
+
+There are many different forms of databases. We have several so-called database management systems (DBMS), which allow us to interact with each of them. Unhelpfully, each different flavor of database has a slightly different dialect of a what is called the *structured query language*, **SQL** for short. Helpfully, on the other hand, there are several packages out there which help us keeping the effort manageable by translating our queries. We will see a few of those here, and in different driving languages (i.e. `R`, `python` and `julia`).
+
+One final important feature of different databases is how (and where) they actually run. The more traditional solutions exist as server-client models, where you would start on a machine (could be your own) a database server, which interacts with the persistent storage (e.g. with your hard disk) to read and write data, and a client process, where you formulate so-called _queries_, and get back the results from the server. In some sense you formulate a question for the database in the client, you submit it to the database, and you get back an answer. Of course those server processes can run on dedicated and powerful machines which you can reach via a network, or directly in the cloud, where they are used to work with arbitrarily huge amounts of data. 
+
+We will focus on a relatively recent addition to the database family called [`duckdb`](https://duckdb.org). The main benefit (beyond it's excellent performance) is that it is very easy to run a database _without_ the need to set up the client-server structure. We will come to that in due course.
+
+### What is `SQL`
+
+As already mentioned, this is the main database language. Here is an example:
+
+```sql
+SELECT carat, cut, clarity, color, price 
+  FROM diamonds 
+  WHERE price > 15000
+```
+
+This reads: 
+
+> From the table called `diamonds` take the columns `carat, cut, clarity, color, price`, but keep only rows where the column `price` is larger than the value `15000`
+
+Not too bad, right?
+
+Let's get this example running now in our computers. We need to create a `duckdb` database first, read some data into it, and the confront it with that `SQL` query. For simplicity we will do this only in `R` to get us started, then we will move on to a more elaborate example and big data, which will use both `R`, `python` and `julia`.
+
+## Simple Intro Example with `R`
+
+```{r setup}
+library(DBI)
+library(duckdb)
+library(tibble)
+con = DBI::dbConnect(duckdb::duckdb(), shutdown = TRUE)  # will get erased after shutdown
+# con = DBI::dbConnect(duckdb::duckdb(), dbdir = "db.duck") # would save on disk
+```
+
+The `con` object is our live connection to the database. Think of it like a telephone receiver - you can talk into it, and it will respond results back to you. As such, we have to refer to `con` in everything we want to do with the database.
+
+Let us first read some data from the `ggplot2` package, and add it to our database. Remember, a database is a collection of tables, and now we are adding two of those:
+
+```{r add_data}
+dbWriteTable(con, "mpg", ggplot2::mpg)
+dbWriteTable(con, "diamonds", ggplot2::diamonds)
+```
+
+Ok, let's see what tables we have in the database now:
+
+```{r listdb}
+dbListTables(con)
+```
+
+Great. Now how do get data _out_ of it? Here goes the `mpg` dataset:
+
+```{r getout}
+con |>
+	dbReadTable("mpg") |>
+    as_tibble()
+```
+
+Back to our SQL query from above. We can submit it to the database listening at `con`:
+
+```{r query1}
+query1 = "SELECT carat, cut, clarity, color, price 
+  FROM diamonds 
+  WHERE price > 15000"
+
+head(dbGetQuery(con, query1))
+```
+
+or of course as before with a pipeline such as
+
+```{r query2}
+con |>
+	dbGetQuery(query1) |>
+	as_tibble()
+```
+
+
+That's it for starters. There is now a whole world out there to learn in terms of SQL queries, database joins, pivots (i.e. reshape operations) etc. I leave you in the hands of Hadley Wickham and his [dedicated chapter](https://r4ds.hadley.nz/databases) on this topic if you want to dive deeper. It will be almost unavoidable to learn some simple SQL, but hopefully it won't be so bad. You will see in the associated pages of this tutorial that there are some very nice translation tools for `R`. Grant's [intro to databases](https://raw.githack.com/uo-ec607/lectures/master/16-databases/16-databases.html#Databases_101)
+is another valuable resource here. Now, however, let's get cracking with the real show, i.e. our big data set on NYC taxi rides.
+
 ```{r reticulate_config}
 #| cache: false
-#| include: false
+# setup python from R with reticulate package
+library(reticulate)
 Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
+
 ```
 
 ## Load libraries
@@ -21,7 +106,7 @@ Sys.setenv(RETICULATE_PYTHON=here::here(".venv/bin/python"))
 ```{r}
 #| cache: false
 
-library(duckdb)
+library(duckdb)  # loaded already 
 ```
 
 ### Python
@@ -107,6 +192,44 @@ that it enables out-of-core computation for bigger than RAM data. See
 [here](https://duckdb.org/2024/03/29/external-aggregation.html) for more details
 and performance considerations (which are still great).
 :::
+
+## Just How Big is This?
+
+Before we get started with some analysis tasks, here's a simple question to ask our database: how many rows are we dealing with here, actually? 
+
+::: {.panel-tabset group="language"}
+
+### R
+
+```{r count-rows}
+nrows = dbGetQuery(
+      con,
+      "
+      FROM 'nyc-taxi/**/*.parquet'
+      SELECT
+        COUNT(passenger_count) as nrows
+      "
+    )
+```
+
+
+### python
+
+```{python count-rows-py}
+# con.
+#   query(
+# 	'''
+#     FROM 'nyc-taxi/**/*.parquet'
+#     SELECT
+#     COUNT(passenger_count) as nrows
+# 	'''
+# )
+```
+
+:::
+
+Ok, well that is `r prettyNum(nrows$nrows,",")`. 😬
+
 
 ## First example
 

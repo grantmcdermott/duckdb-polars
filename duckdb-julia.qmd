@@ -1,0 +1,243 @@
+---
+title: DuckDB in Julia
+subtitle: Use the same queries from Julia
+engine: julia
+execute:
+  freeze: auto
+author: 
+  - name: Florian Oswald
+    url: https://floswald.github.io
+    email: florian.oswald@unito.it
+    orcid: 0000-0001-7737-2038
+    affiliations:
+      - University of Turin
+      - SciencesPo Paris (on leave)
+date: last-modified
+---
+
+
+## Load libraries
+
+We have a [julia package](https://duckdb.org/docs/api/julia.html) as well for `duckdb`. ^[Note that there is currently a [bug](https://github.com/PumasAI/QuartoNotebookRunner.jl/issues/190) in the QuartoRunner setup. So, to run the quarto notebook, you have to use julia 1.10. For just executing the code, the latest julia version should work] 
+
+
+## Create a database connection
+
+We proceed as before with the other languages:
+
+```{julia}
+using DuckDB
+using DataFrames
+using Dates
+using Chain
+con = DBInterface.connect(DuckDB.DB)
+```
+
+Let's run the first simple query again to get the number of rows, as before with R:
+
+```{julia}
+nrowsdb = @chain con begin
+	DBInterface.execute(
+		"""
+		FROM 'nyc-taxi/**/*.parquet'
+        SELECT COUNT(passenger_count) as nrows
+		"""
+	)
+end
+
+ncolsdb = DBInterface.execute(con,
+		"""
+		FROM 'nyc-taxi/**/*.parquet'
+         SELECT * LIMIT 1
+		 """
+		 ) |> DataFrame |> names |> length
+
+(rows = nrowsdb, cols = ncolsdb)
+```
+	
+... and we know that this is a lot of data:
+
+
+```{julia}
+run(`du -h -d 0 nyc-taxi`)
+```
+
+
+## First example
+
+Same examples as previously:
+
+```sql
+SELECT
+  passenger_count,
+  AVG(tip_amount) AS mean_tip
+FROM 'nyc-taxi/**/*.parquet'
+GROUP BY passenger_count
+ORDER BY passenger_count
+```
+
+```{julia}
+time1 = @elapsed dat1 = DBInterface.execute(
+	con,
+	"""
+	FROM 'nyc-taxi/**/*.parquet'
+	SELECT
+		passenger_count,
+		AVG(tip_amount) AS mean_tip
+	GROUP BY ALL
+	ORDER BY ALL
+	"""
+	)
+```
+
+That took `{julia} round(time1,digits = 2)` seconds. Here is the result:
+
+
+```{julia}
+first(dat1,5)
+```
+
+
+
+## More Aggregation
+
+Let's try out some more aggregation queries. How about a slightly variation on a our first example query, where we (a) add "month" as a second grouping variable, and (b) subset to only the first
+three months of the year. 
+
+
+```{julia}
+time2 = @elapsed dat1 = DBInterface.execute(
+	con,
+	"""
+	FROM 'nyc-taxi/**/*.parquet'
+	SELECT
+		passenger_count,
+		AVG(tip_amount) AS mean_tip
+    WHERE month <= 3
+	GROUP BY ALL
+	"""
+	)
+```
+
+This time we clocked up `{julia} round(time2,digits = 2)` seconds - keep in mind that this is *a lot* of data to go through each time.
+
+## Julia Specifics: `register_data_frame`
+
+One cool thing about the julia package is that you can *register* a local dataframe into the database, which means that there is _no copy oepration_ performed. Duckdb will directly read that julia dataframe instead:
+
+```{julia}
+DuckDB.register_data_frame(con, dat1, "dat1_on_db")
+
+# let's read the first row back out just to check
+results = DBInterface.execute(con, 
+	"""
+	SELECT * FROM dat1_on_db
+	LIMIT 1
+	"""
+	)
+DataFrame(results)
+```
+
+
+## Julia Specifics: `Appender`
+
+The [appender](https://duckdb.org/docs/data/appender.html)
+is an advanced duckdb feature which is optimized for fast row insertion into a database table. This feature is not available in neither `R` nor `python` packages. Here is an example. Let's first create a new dataframe in your julia session and then read it row by row into an empty database table.
+ 
+```{julia}
+ndf = 100_000
+df = DataFrame(
+        id        = collect(1:ndf),
+        value     = rand(Float32,ndf),
+        timestamp = Dates.now() + Dates.Second.(1:ndf),
+        date      = Dates.today() + Dates.Day.(1:ndf)
+    )
+first(df,5)
+```
+ 
+create a new database with an empty table called `test_table1`:
+
+
+```{julia}
+db = DuckDB.DB()
+
+DBInterface.execute(db,
+    """
+    CREATE OR REPLACE TABLE 
+	test_table1(id INTEGER PRIMARY KEY, value FLOAT, timestamp TIMESTAMP, date DATE)
+    """)
+```
+
+Now let us prepare a SQL statement, into which we will repeatedly insert the row for each data. This makes use of the _positional parameters_ `?`:
+
+```{julia}
+stmt = DBInterface.prepare(db, 
+    """
+    INSERT INTO test_table1 VALUES(?,?,?,?)
+    """
+	)
+```
+
+
+We are ready to time this now.
+
+```{julia}
+e = @elapsed res = 
+	begin
+		for r in eachrow(df)
+			DBInterface.execute(stmt, 
+				(r.id, r.value, r.timestamp, r.date)
+			)
+		end
+		DBInterface.close!(stmt)  # close statement when done
+	end
+```
+
+On my machine this took `{julia} round(e,digits = 2)` seconds. This is probably not the most efficient way to get data into your database, but it could happen (if you create the data yourself from some modeling task, for example). 
+
+Now, let's try with the `Appender` API. We create an identical table, and attach an `Appender` object to it:
+
+
+```{julia}
+DBInterface.execute(db,
+    "CREATE OR REPLACE TABLE 
+	test_table2(id INTEGER PRIMARY KEY, value FLOAT, timestamp TIMESTAMP, date DATE)")
+
+# create an appender on the second table
+appender = DuckDB.Appender(db, "test_table2")
+```
+
+let's see how fast that insert operation is now:
+
+```{julia}
+e2 = @elapsed begin
+    for i in eachrow(df)
+        for j in i
+            DuckDB.append(appender, j)
+        end
+    DuckDB.end_row(appender)
+    end
+    DuckDB.close(appender)  # done now
+end
+```
+
+Now only `{julia} round(e2,digits = 2)` seconds only! Holy smokes.
+
+::: {.callout-tip}
+
+# Meta Info
+
+For the purpose of working with this notebook, we can currently only have a single quarto `engine` per notebook. While it's perfectly possible to call both `R` and `python` code from a running `julia` session, one needs to annotate the code with some additional markup, which is not great for a learner. So I prefered to separate the julia version from the others.
+It's most useful to create a local environment. To achieve this, you can open julia in the root of this document and do
+
+```julia
+] activate .  # activate current dir in Pkg mode
+add DuckDB
+add DataFrames
+add Dates
+add Chain
+```
+
+and quarto will pick up this env when it sees `engine: julia` in the frontmatter. 
+
+:::

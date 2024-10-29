@@ -11,11 +11,11 @@ workshop starts!
 ## Have you cloned the GitHub repo yet?
 
 My working assumption is that you have already cloned the
-[companion GitHub repo](https://github.com/grantmcdermott/duckdb-polars)
+[companion GitHub repo](https://github.com/floswald/duckdb-polars)
 to this website. If not, please do so before continuing and navigate to the
 root of your local clone, using the following commands.
 ```sh
-git clone https://github.com/grantmcdermott/duckdb-polars.git
+git clone https://github.com/floswald/duckdb-polars.git
 cd duckdb-polars
 ```
 (Don't worry if you can't clone the repo for some reason. You may need to adjust
@@ -30,7 +30,8 @@ or both.  Ideally, I'd recommend both since one of my goals is to demonstrate
 the close equivalency in workflows across languages. But I'll leave that to
 you.^[If you're unsure and just want to pick one, then I recommend R. It's much
 easier to install and manage environments. Plus it's also my preferred language,
-so you're likely to get better support from me.]
+so you're likely to get better support from me.] In a separate notebook we added the Julia
+version of the main workshop content. While it's perfectly possible to call both `R` and `python` code from a running `julia` session, one needs to annotate the code with some additional markup, which is not great for a learner.
 
 :::: {.panel-tabset}
 
@@ -83,11 +84,11 @@ suppressMessages(rspm::enable())
 
 :::
 
-## Python
+## Python (base)
 
 First create and activate a Python virtual environment from your terminal.
 (Important: I'll assume that you are in the current root of this repo.) The
-exact command varies by operating system.
+exact command varies by operating system. 
 
 ```sh
 # MacOS / Linux
@@ -102,7 +103,7 @@ py -m venv .venv
 Then install the Python packages that we will be using.
 
 ```sh
-python3 -m pip install duckdb polars pyarrow pandas matplotlib -U
+python3 -m pip install duckdb polars pyarrow pandas matplotlib yaml -U
 python3 -m pip install 'ibis-framework[duckdb,polars]' -U
 ```
 
@@ -133,6 +134,31 @@ i.e.
 ```
 :::
 
+## Python (conda)
+
+To add a little to the confusion, you may also have a local `conda` installation to manage your python dependencies. If this is the case, you can create the relevant environment as follows:
+
+```sh
+conda create --platform osx-arm64 -n duck-env duckdb pandas polars matplotlib ibis-framework pyarrow
+```
+
+Notice that this call adjusts for the quirks of having a certain chipset on my Macbook Pro (M1), for which I needed to required the ARM64 platform version of python and packages. 🤷🏻‍♂️
+
+## Julia
+
+You should get the [latest version](https://julialang.org/downloads/) of julia, start it on your terminal at the root of this repository, and execute the following:
+
+```julia
+] activate .  # hit ] and type `activate .`
+add DuckDB
+add DataFrames
+add Dates
+add Chain
+```
+
+This will download the required packages and add them to the local environement, which was created by the first line. This created a `Project.toml` file in the current directory (i.e. `.` in the `activate` above).
+
+
 ::::
 
 ## NYC taxi data
@@ -159,7 +185,7 @@ mkdir -p nyc-taxi/year=2012
 aws s3 cp s3://voltrondata-labs-datasets/nyc-taxi/year=2012 nyc-taxi/year=2012 --recursive --no-sign-request
 ```
 
-Besides being relatively chonky, there are two features of this dataset that
+Besides being relatively chonky (8.6Gb), there are two features of this dataset that
 we'll come back to since they are key to our workflow:
 
 - The data are stored in `.parquet` file format.

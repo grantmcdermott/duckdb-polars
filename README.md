@@ -1,4 +1,11 @@
+
+# Clone of Original Repository!
+
+This repo is a clone of [https://github.com/grantmcdermott/duckdb-polars](https://github.com/grantmcdermott/duckdb-polars).
+
+
 # (Pretty) big data wrangling with DuckDB and Polars
+
 
 - These materials were prepared as part of the
 [Workshops for Ukraine](https://sites.google.com/view/dariia-mykhailyshyna/main/r-workshops-for-ukraine#h.xc2x33lbfxln)
@@ -36,3 +43,9 @@ _Disclaimer: The content for this workshop has been prepared, and is presented,
 in my personal capacity. Any opinions expressed herein are my own and are not
 necessarily shared by my employer. Please do not share any recorded material
 without the express permission of myself or the workshop organisers._
+
+
+
+### Meta info
+
+* to get quarto to run with conda env, look at [this](https://thedatasavvycorner.com/blogs/08-quarto-conda-env)
