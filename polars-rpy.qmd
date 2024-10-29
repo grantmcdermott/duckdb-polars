@@ -3,7 +3,7 @@ title: Polars from Python and R
 subtitle: 'Pro-tip: Just swap `.` (Python) for `$` (R), or vice versa'
 execute:
   freeze: auto
-  cache: true
+  cache: false
 ---
 
 ```{r reticulate_config}
@@ -178,13 +178,12 @@ Let's take a look at the optimized query that Polars will implement for us.
 
 ```{python pl_q2_show}
 # q2             # naive
-q2.show_graph()  # optimized
+# q2.show_graph()  # optimized
 ```
 
 ### R 
 
 ```{r pl_q2_expain_r}
-#| dependson: pl_q2_r
 # q2              # naive
 cat(q2$explain()) # optimized
 ```

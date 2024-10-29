@@ -5,7 +5,7 @@ project:
     - "!py-polars.qmd"
 
 website:
-  title: "DuckDB + Polars"
+  title: "(Clone of) DuckDB + Polars"
   
   navbar:
     left:
@@ -17,7 +17,7 @@ website:
       - sidebar:polars
     tools:
       - icon: github
-        href:  https://github.com/grantmcdermott/duckdb-polars
+        href:  https://github.com/floswald/duckdb-polars
         
   sidebar:
     - id: slides
@@ -34,6 +34,7 @@ website:
         - duckdb-sql.qmd
         - duckdb-dplyr.qmd
         - duckdb-ibis.qmd
+        - duckdb-julia.qmd
     - id: polars
       title: "Polars"
       style: "docked"

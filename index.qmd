@@ -5,11 +5,15 @@ author:
   - name: Grant McDermott
     url: https://grantmcdermott.com
     email: gmcd@amazon.com
-    affiliations:
+    affiliation:
       - Principal Economist, Amazon
     orcid: 0000-0001-7883-8573
-date: last-modified
+date: September 1, 2024
 ---
+
+## Disclaimer: This is a Clone made by Florian Oswald
+
+This is a clone of Grant McDermott's wonderful workshop hosted [here](https://grantmcdermott.com/duckdb-polars/). What you see here is a copy of his work, to which I ([Florian Oswald](https://floswald.github.io) added the [julia version of duckdb](duckdb-julia.qmd). I also added the relevant julia setup in [requirements](requirements.qmd). Grant has not vetted those additions in any way, so any additional errors were introduced without his knowledge. Please checkout the source code for his original work, and make a fork from it, if you want to use it, [on github](https://github.com/grantmcdermott/duckdb-polars). *Thanks Grant as ever for sharing those great resources with the rest of the world!*
 
 ## Description
 
