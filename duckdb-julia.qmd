@@ -87,7 +87,7 @@ time1 = @elapsed dat1 = DBInterface.execute(
 	GROUP BY ALL
 	ORDER BY ALL
 	"""
-	) |> DataFrame
+	)
 ```
 
 That took `{julia} round(time1,digits = 2)` seconds. Here is the result:
@@ -116,7 +116,7 @@ time2 = @elapsed dat1 = DBInterface.execute(
     WHERE month <= 3
 	GROUP BY ALL
 	"""
-	) |> DataFrame
+	)
 ```
 
 This time we clocked up `{julia} round(time2,digits = 2)` seconds - keep in mind that this is *a lot* of data to go through each time.
@@ -126,12 +126,12 @@ This time we clocked up `{julia} round(time2,digits = 2)` seconds - keep in mind
 One cool thing about the julia package is that you can *register* a local dataframe into the database, which means that there is _no copy oepration_ performed. Duckdb will directly read that julia dataframe instead:
 
 ```{julia}
-DuckDB.register_data_frame(con, dat_long, "dat_long_on_db")
+DuckDB.register_data_frame(con, dat1, "dat1_on_db")
 
 # let's read the first row back out just to check
 results = DBInterface.execute(con, 
 	"""
-	SELECT * FROM dat_long_on_db
+	SELECT * FROM dat1_on_db
 	LIMIT 1
 	"""
 	)

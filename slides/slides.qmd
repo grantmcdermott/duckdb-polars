@@ -68,7 +68,7 @@ library(duckdb)
 library(arrow)
 library(dplyr)
 
-nyc = open_dataset(here::here("taxi-data"))
+nyc = open_dataset(here::here("nyc-taxi"))
 prettyNum(nrow(nyc), ",")
 
 tic = Sys.time()
