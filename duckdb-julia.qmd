@@ -88,7 +88,7 @@ time1 = @elapsed dat1 = DBInterface.execute(
 	GROUP BY ALL
 	ORDER BY ALL
 	"""
-	)
+	) |> DataFrame
 ```
 
 That took `{julia} round(time1,digits = 2)` seconds. Here is the result:
