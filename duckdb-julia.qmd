@@ -2,16 +2,17 @@
 title: DuckDB in Julia
 subtitle: Use the same queries from Julia
 engine: julia
+julia: 
+  exeflags: ["--threads=auto"]
 execute:
   freeze: auto
 author: 
   - name: Florian Oswald
     url: https://floswald.github.io
-    email: florian.oswald@unito.it
+    email: florian.oswald@gmail.com
     orcid: 0000-0001-7737-2038
     affiliations:
       - University of Turin
-      - SciencesPo Paris (on leave)
 date: last-modified
 ---
 

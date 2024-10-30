@@ -6,7 +6,7 @@ con = DBInterface.connect(DuckDB.DB)
 
 # https://grantmcdermott.com/duckdb-polars/duckdb-sql.html
 # https://duckdb.org/docs/api/julia.html#basics
-dat1 = DBInterface.execute(
+@elapsed DBInterface.execute(
   con,
   "
   FROM 'nyc-taxi/**/*.parquet'
@@ -17,6 +17,7 @@ dat1 = DBInterface.execute(
   ORDER BY ALL
   "
 )
+
 
 df_long = DBInterface.execute(
   con,
