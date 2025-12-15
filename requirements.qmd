@@ -182,7 +182,7 @@ download options.
 
 ```sh
 mkdir -p nyc-taxi/year=2012
-aws s3 cp s3://voltrondata-labs-datasets/nyc-taxi/year=2012 nyc-taxi/year=2012 --recursive --no-sign-request
+aws s3 cp s3://arrow-datasets/nyc-taxi/year=2012 nyc-taxi/year=2012 --recursive --no-sign-request
 ```
 
 Besides being relatively chonky (8.6Gb), there are two features of this dataset that
@@ -202,8 +202,8 @@ Here's a quick example of how to do it for the first two months.
 ```sh
 mkdir -p nyc-taxi/year=2012/month=1
 mkdir -p nyc-taxi/year=2012/month=2
-aws s3 cp s3://voltrondata-labs-datasets/nyc-taxi/year=2012/month=1/ nyc-taxi/year=2012/month=1 --recursive --no-sign-request
-aws s3 cp s3://voltrondata-labs-datasets/nyc-taxi/year=2012/month=2/ nyc-taxi/year=2012/month=2 --recursive --no-sign-request
+aws s3 cp s3://arrow-datasets/nyc-taxi/year=2012/month=1/ nyc-taxi/year=2012/month=1 --recursive --no-sign-request
+aws s3 cp s3://arrow-datasets/nyc-taxi/year=2012/month=2/ nyc-taxi/year=2012/month=2 --recursive --no-sign-request
 ```
 
 #### Alternative download options
@@ -218,7 +218,7 @@ library(dplyr)
 
 data_path = "nyc-taxi/year=2012" # Or set your own preferred path
 
-open_dataset("s3://voltrondata-labs-datasets/nyc-taxi/year=2012") |>
+open_dataset("s3://arrow-datasets/nyc-taxi/year=2012") |>
     write_dataset(data_path, partitioning = "month")
 ```
 
