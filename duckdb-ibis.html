@@ -58,7 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -103,10 +103,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
-<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
 
 
 <link rel="stylesheet" href="styles.css">
@@ -239,6 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#aggregation" id="toc-aggregation" class="nav-link" data-scroll-target="#aggregation">Aggregation</a></li>
   <li><a href="#pivot-reshape" id="toc-pivot-reshape" class="nav-link" data-scroll-target="#pivot-reshape">Pivot (reshape)</a></li>
   <li><a href="#joins-merges" id="toc-joins-merges" class="nav-link" data-scroll-target="#joins-merges">Joins (merges)</a></li>
+  <li><a href="#disconnect" id="toc-disconnect" class="nav-link" data-scroll-target="#disconnect">Disconnect</a></li>
   </ul>
 </nav>
     </div>
@@ -267,7 +267,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="load-libraries" class="level2">
 <h2 class="anchored" data-anchor-id="load-libraries">Load libraries</h2>
-<div id="0c450a71" class="cell" data-cache="true" data-execution_count="2">
+<div id="bb88d661" class="cell" data-cache="true" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ibis</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ibis.selectors <span class="im">as</span> s</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ibis <span class="im">import</span> _</span>
@@ -276,56 +276,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="connect-and-register" class="level2">
 <h2 class="anchored" data-anchor-id="connect-and-register">Connect and register</h2>
-<div id="ff49f5de" class="cell" data-execution_count="3">
+<div id="c300d3d0" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Instantiate an in-memory DuckDB connection from Ibis</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> ibis.duckdb.<span class="ex">connect</span>()</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">## Register our parquet dataset as a table called "nyc" in our connection</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>con.register(<span class="st">"nyc-taxi/**/*.parquet"</span>, <span class="st">"nyc"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">DatabaseTable: nyc
-  vendor_name           string
-  pickup_datetime       timestamp
-  dropoff_datetime      timestamp
-  passenger_count       int64
-  trip_distance         float64
-  pickup_longitude      float64
-  pickup_latitude       float64
-  rate_code             string
-  store_and_fwd         string
-  dropoff_longitude     float64
-  dropoff_latitude      float64
-  payment_type          string
-  fare_amount           float64
-  extra                 float64
-  mta_tax               float64
-  tip_amount            float64
-  tolls_amount          float64
-  total_amount          float64
-  improvement_surcharge float64
-  congestion_surcharge  float64
-  pickup_location_id    int64
-  dropoff_location_id   int64
-  month                 int64
-  year                  int64
-</pre>
-</div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>nyc <span class="op">=</span> con.read_parquet(<span class="st">"nyc-taxi/**/*.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Aside: Remember that you can create a persistent, disk-backed database by giving it an appropriate name/path. This also enables out-of-core computation for bigger than RAM data.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># con = ibis.duckdb.connect("nyc.dbb")</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># con.register("nyc-taxi/**/*.parquet", "nyc")</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># nyc = con.read_parquet("nyc-taxi/**/*.parquet")</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># etc.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Reference the table from Python. We’ll call this reference object <code>nyc</code> too for consistency, but you could call it whatever you want (e.g., you could call it <code>nyc_ibis</code> to avoid potential ambiguity with the “nyc” table in our actual DuckDB connection). Printing the object to screen will give us a lazy preview.</p>
-<div id="23c1e7df" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># con.list_tables() # Optional: confirm that our table is available</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>nyc <span class="op">=</span> con.table(<span class="st">"nyc"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>nyc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="0c114d42" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nyc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">DatabaseTable: nyc
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">DatabaseTable: ibis_read_parquet_ubbotra4snbqjhfys5d3pmq44e
   vendor_name           string
-  pickup_datetime       timestamp
-  dropoff_datetime      timestamp
+  pickup_datetime       timestamp(6)
+  dropoff_datetime      timestamp(6)
   passenger_count       int64
   trip_distance         float64
   pickup_longitude      float64
@@ -353,7 +322,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="first-example" class="level2">
 <h2 class="anchored" data-anchor-id="first-example">First example</h2>
-<div id="90e5931a" class="cell" data-execution_count="5">
+<div id="99faa558" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>q1 <span class="op">=</span> (</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  nyc</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  .group_by([<span class="st">"passenger_count"</span>])</span>
@@ -361,19 +330,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To see the underlying SQL translation, use <code>ibis.to_sql()</code></p>
-<div id="e05d5b86" class="cell" data-execution_count="6">
+<div id="72748c92" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ibis.to_sql(q1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display cell-output-markdown" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  t0.passenger_count,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(t0.tip_amount) <span class="kw">AS</span> mean_tip</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> main.nyc <span class="kw">AS</span> t0</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="ot">"t0"</span>.<span class="ot">"passenger_count"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AVG</span>(<span class="ot">"t0"</span>.<span class="ot">"tip_amount"</span>) <span class="kw">AS</span> <span class="ot">"mean_tip"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> <span class="ot">"ibis_read_parquet_ubbotra4snbqjhfys5d3pmq44e"</span> <span class="kw">AS</span> <span class="ot">"t0"</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <p>To actually execute the query and bring the result into Python, we can use the <code>execute()</code> method. By default this will coerce to a <strong>pandas</strong> DataFrame.</p>
-<div id="5291ec7f" class="cell" data-execution_count="7">
+<div id="72ec065b" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dat1 <span class="op">=</span> q1.execute()</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>dat1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -391,93 +360,93 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">0</th>
-<td>0</td>
-<td>0.862099</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>254</td>
-<td>0.000000</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
 <td>249</td>
 <td>0.000000</td>
 </tr>
 <tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0</td>
+<td>0.862099</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>254</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
-<td>1</td>
-<td>1.151011</td>
+<td>8</td>
+<td>0.350769</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
-<td>247</td>
-<td>2.300000</td>
+<td>66</td>
+<td>1.500000</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">5</th>
-<td>4</td>
-<td>0.844519</td>
+<td>2</td>
+<td>1.081580</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">6</th>
+<td>208</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>10</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>1</td>
+<td>1.151011</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>247</td>
+<td>2.300000</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
 <td>3</td>
 <td>0.962949</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">11</th>
 <td>6</td>
 <td>1.128365</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">12</th>
 <td>5</td>
 <td>1.102732</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">9</th>
-<td>9</td>
-<td>0.806800</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">10</th>
-<td>177</td>
-<td>1.000000</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">11</th>
+<th data-quarto-table-cell-role="th">13</th>
 <td>65</td>
 <td>0.000000</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">12</th>
-<td>2</td>
-<td>1.081580</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">13</th>
-<td>208</td>
-<td>0.000000</td>
-</tr>
-<tr class="odd">
 <th data-quarto-table-cell-role="th">14</th>
-<td>10</td>
-<td>0.000000</td>
+<td>9</td>
+<td>0.806800</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">15</th>
-<td>7</td>
-<td>0.544118</td>
+<td>177</td>
+<td>1.000000</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">16</th>
-<td>8</td>
-<td>0.350769</td>
+<td>7</td>
+<td>0.544118</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">17</th>
-<td>66</td>
-<td>1.500000</td>
+<td>4</td>
+<td>0.844519</td>
 </tr>
 </tbody>
 </table>
@@ -502,7 +471,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="digression-interactive-ibis-use-and-eager-execution">Digression: Interactive Ibis use and eager execution</h3>
 <p>At the very top of this document, I commented out the <code>ibis.options.interactive</code> option as part of my Ibis configuration. This was because I wanted to demonstrate the default <em>deferred</em> (i.e., lazy) behaviour of Ibis, which is just the same as <strong>d(b)plyr</strong> in R. If you are building data wrangling pipelines, or writing scripts with potentially complex queries, you probably want to preserve this deferred behaviour and avoid eager execution.</p>
 <p><em>However</em>, there are times when you may want to default into eager execution. For example, if your dataset is of manageable size, or you are trying to iterate through different query operations… Or, you might just want to enable it so that you automatically get a nice print return object for your workshop materials. I’ll adopt the latter view, so that I can quickly demonstrate some Ibis syntax and results for the rest of this document.</p>
-<div id="94293361" class="cell" data-cache="false" data-execution_count="8">
+<div id="a5918e2d" class="cell" data-cache="false" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ibis.options.interactive <span class="op">=</span> <span class="va">True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Okay, let’s speed through some of the same basic queries that we’ve already seen in the DuckDB SQL and R (dplyr) pages. I won’t bother to explain them in depth. Just consider them for demonstration purposes.</p>
@@ -510,7 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="aggregation" class="level2">
 <h2 class="anchored" data-anchor-id="aggregation">Aggregation</h2>
-<div id="90b24d26" class="cell" data-execution_count="9">
+<div id="93d0f953" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  nyc</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  .group_by([<span class="st">"passenger_count"</span>, <span class="st">"trip_distance"</span>])</span>
@@ -519,34 +488,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    mean_fare <span class="op">=</span> _.fare_amount.mean()</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"57c3760fed554064bd1070b238f1ea5e","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃<span style="font-weight: bold"> passenger_count </span>┃<span style="font-weight: bold"> trip_distance </span>┃<span style="font-weight: bold"> mean_tip </span>┃<span style="font-weight: bold"> mean_fare </span>┃
 ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━┩
 │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span>           │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>       │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>  │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>   │
 ├─────────────────┼───────────────┼──────────┼───────────┤
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.578975</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.687596</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.80</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.669911</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">24.652684</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.50</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.384175</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.883433</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.223380</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.352555</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.77</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.499988</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.271770</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.911617</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.669678</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4.00</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.516746</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">14.098944</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.495665</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.764356</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.10</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.526552</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.079754</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.783820</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.720520</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.3</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.812836</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17.073446</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.2</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.144488</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.271308</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.2</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.143411</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.369103</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.222421</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">24.642239</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17.4</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.635788</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">47.341387</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.2</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.397633</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.819041</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.4</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.069486</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.005681</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">16.9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.056976</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">47.266028</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17.8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.755452</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">48.073206</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.1</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.278962</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.872071</span> │
 │               <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │
 └─────────────────┴───────────────┴──────────┴───────────┘
 </pre>
 </div>
 </div>
 <p>Note that, even though we have enabled the interactive print mode, we still get lazy evalation if we assign a chain of query steps to an object (here: <code>q3</code>)…</p>
-<div id="37b8ca9e" class="cell" data-execution_count="10">
+<div id="bb840417" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>q3 <span class="op">=</span> (</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  nyc</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  .group_by([<span class="st">"passenger_count"</span>, <span class="st">"trip_distance"</span>])</span>
@@ -557,29 +521,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>… but printing the query to screen enforces computation.</p>
-<div id="8aa460dd" class="cell" data-execution_count="11">
+<div id="cc775a1a" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>q3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"e6e3fd9098bf4e41a217287d16ca9f06","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃<span style="font-weight: bold"> passenger_count </span>┃<span style="font-weight: bold"> trip_distance </span>┃<span style="font-weight: bold"> mean_tip </span>┃<span style="font-weight: bold"> mean_fare </span>┃
 ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━┩
 │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span>           │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>       │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>  │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>   │
 ├─────────────────┼───────────────┼──────────┼───────────┤
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.0</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.942336</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.932499</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.808778</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">29.238556</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.0</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.250686</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.611495</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.2</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.688208</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.640748</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.3</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.720728</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.941542</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.6</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.404022</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">13.127911</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4.1</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.545880</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">14.321923</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.4</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.753561</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7.243111</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.3</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.171171</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.518436</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.0</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.810508</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.988705</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │         <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.10</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.839358</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">29.974973</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.60</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.973256</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.619201</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.50</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.384175</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.883433</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.30</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.040463</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9.740110</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.86</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.777333</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.460294</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.90</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.578975</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.687596</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6.80</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.977422</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">20.725585</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.70</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.727560</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.173302</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.81</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.513297</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.402281</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.77</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.499988</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.271770</span> │
 │               <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │
 └─────────────────┴───────────────┴──────────┴───────────┘
 </pre>
@@ -588,35 +547,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="pivot-reshape" class="level2">
 <h2 class="anchored" data-anchor-id="pivot-reshape">Pivot (reshape)</h2>
-<div id="41409b50" class="cell" data-execution_count="12">
+<div id="d3936071" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># now chain on pivoting (and enforce computation via printing)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  q3</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  .pivot_longer(s.r[<span class="st">"mean_tip"</span>:<span class="st">"mean_fare"</span>])</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  .pivot_longer([<span class="st">"mean_tip"</span>, <span class="st">"mean_fare"</span>])</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"387b26c981dc4cff81e0da8334100562","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
-</script>
-</div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
-┃<span style="font-weight: bold"> passenger_count </span>┃<span style="font-weight: bold"> trip_distance </span>┃<span style="font-weight: bold"> name      </span>┃<span style="font-weight: bold"> value    </span>┃
-┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
-│ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span>           │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>       │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">string</span>    │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>  │
-├─────────────────┼───────────────┼───────────┼──────────┤
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.7</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.433840</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.7</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.117718</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.8</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.534714</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.8</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.360443</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.7</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.493234</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.7</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.035307</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.3</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.310850</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.3</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4.192242</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.8</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.414165</span> │
-│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.8</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.470059</span> │
-│               <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span>         │        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │
-└─────────────────┴───────────────┴───────────┴──────────┘
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
+┃<span style="font-weight: bold"> passenger_count </span>┃<span style="font-weight: bold"> trip_distance </span>┃<span style="font-weight: bold"> name      </span>┃<span style="font-weight: bold"> value     </span>┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━┩
+│ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span>           │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>       │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">string</span>    │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>   │
+├─────────────────┼───────────────┼───────────┼───────────┤
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │         <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.10</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.839358</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │         <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11.10</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">29.974973</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.60</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.973256</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.60</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.619201</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.50</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.384175</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3.50</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.883433</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.30</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.040463</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2.30</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9.740110</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.86</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_tip </span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.777333</span> │
+│               <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.86</span> │ <span style="color: #008000; text-decoration-color: #008000">mean_fare</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8.460294</span> │
+│               <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │             <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span>         │         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │
+└─────────────────┴───────────────┴───────────┴───────────┘
 </pre>
 </div>
 </div>
@@ -624,11 +578,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="joins-merges" class="level2">
 <h2 class="anchored" data-anchor-id="joins-merges">Joins (merges)</h2>
 <p>(As we did in the <strong>dplyr</strong> code, we’ll break this contrived join example into two steps)</p>
-<div id="22450a01" class="cell" data-execution_count="13">
+<div id="52e290e8" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mean_tips <span class="op">=</span> nyc.group_by(<span class="st">"month"</span>).agg(mean_tip <span class="op">=</span> _.tip_amount.mean())</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mean_fares <span class="op">=</span> nyc.group_by(<span class="st">"month"</span>).agg(mean_fare <span class="op">=</span> _.fare_amount.mean())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="834894e5" class="cell" data-execution_count="14">
+<div id="40e7abb9" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  mean_tips</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  .left_join(mean_fares, <span class="st">"month"</span>)</span>
@@ -639,29 +593,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ┡━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━┩
 │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span> │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>  │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">int64</span>       │ <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">float64</span>   │
 ├───────┼──────────┼─────────────┼───────────┤
-│    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.250903</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.270138</span> │
-│    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.281239</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.501252</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.079521</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.492650</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.091082</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.548651</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.254601</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.391198</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.078014</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.585157</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.059312</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.379943</span> │
+│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.056353</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.223107</span> │
 │     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.036874</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9.942640</span> │
 │     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.043167</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.335490</span> │
-│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.007817</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> │  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9.813488</span> │
-│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.078014</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.585157</span> │
-│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.254601</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.391198</span> │
-│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.059312</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.379943</span> │
-│     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.079521</span> │           <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10.492650</span> │
 │    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.237651</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.313953</span> │
+│    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.250903</span> │          <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">11</span> │ <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12.270138</span> │
 │     <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │        <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │           <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">…</span> │
 └───────┴──────────┴─────────────┴───────────┘
 </pre>
 </div>
+</div>
+</section>
+<section id="disconnect" class="level2">
+<h2 class="anchored" data-anchor-id="disconnect">Disconnect</h2>
+<div id="a0cb0d79" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>con.disconnect()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
 </section>
 
 </main> <!-- /main -->
-<script type="application/vnd.jupyter.widget-state+json">
-{"state":{"02ee9849655b4f51b4c79734585c6f2d":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"auto"}},"0e533a3d1e184de9bdbfd26bf84edfec":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"auto"}},"29ea437e3a19447498f41e4ed1321508":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":"black","description_width":""}},"387b26c981dc4cff81e0da8334100562":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"","description":"","description_allow_html":false,"layout":"IPY_MODEL_84cab977d863443b9904eb8ec712dde8","max":100,"min":0,"orientation":"horizontal","style":"IPY_MODEL_bb6685ab8fb042c29bdfb6f7ab126466","tabbable":null,"tooltip":null,"value":100}},"57c3760fed554064bd1070b238f1ea5e":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"","description":"","description_allow_html":false,"layout":"IPY_MODEL_0e533a3d1e184de9bdbfd26bf84edfec","max":100,"min":0,"orientation":"horizontal","style":"IPY_MODEL_29ea437e3a19447498f41e4ed1321508","tabbable":null,"tooltip":null,"value":100}},"798a3297d326439997c48efc21c48643":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":"black","description_width":""}},"84cab977d863443b9904eb8ec712dde8":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"auto"}},"bb6685ab8fb042c29bdfb6f7ab126466":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":"black","description_width":""}},"e6e3fd9098bf4e41a217287d16ca9f06":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"","description":"","description_allow_html":false,"layout":"IPY_MODEL_02ee9849655b4f51b4c79734585c6f2d","max":100,"min":0,"orientation":"horizontal","style":"IPY_MODEL_798a3297d326439997c48efc21c48643","tabbable":null,"tooltip":null,"value":100}}},"version_major":2,"version_minor":0}
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

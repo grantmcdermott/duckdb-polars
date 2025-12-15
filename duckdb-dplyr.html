@@ -330,24 +330,32 @@ GROUP BY passenger_count
 physical_plan
 ┌───────────────────────────┐
 │       HASH_GROUP_BY       │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
-│             #0            │
-│          avg(#1)          │
-└─────────────┬─────────────┘                             
+│    ────────────────────   │
+│         Groups: #0        │
+│    Aggregates: avg(#1)    │
+│                           │
+│     ~113,547,553 rows     │
+└─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │         PROJECTION        │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│    ────────────────────   │
 │      passenger_count      │
 │         tip_amount        │
-└─────────────┬─────────────┘                             
+│                           │
+│     ~179,629,584 rows     │
+└─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │       READ_PARQUET        │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│    ────────────────────   │
+│         Function:         │
+│        READ_PARQUET       │
+│                           │
+│        Projections:       │
 │      passenger_count      │
 │         tip_amount        │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
-│       EC: 179629584       │
-└───────────────────────────┘                             </code></pre>
+│                           │
+│     ~179,629,584 rows     │
+└───────────────────────────┘</code></pre>
 </div>
 </div>
 <p>Similarly, to show the SQL translation that will be implemented on the backend, using <code>show_query</code>.</p>
@@ -365,20 +373,27 @@ GROUP BY passenger_count</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>q1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Source:   SQL [?? x 2]
-# Database: DuckDB v0.10.1 [gmcd@Darwin 23.4.0:R 4.4.0/:memory:]
+# Database: DuckDB 1.4.3 [root@Darwin 24.6.0:R 4.5.2/:memory:]
    passenger_count mean_tip
              &lt;dbl&gt;    &lt;dbl&gt;
- 1               5    1.10 
- 2              65    0    
+ 1               7    0.544
+ 2               5    1.10 
  3               9    0.807
  4             177    1    
- 5               0    0.862
- 6             254    0    
- 7             249    0    
- 8               7    0.544
- 9               8    0.351
-10              66    1.5  
-# ℹ more rows</code></pre>
+ 5              65    0    
+ 6             208    0    
+ 7              10    0    
+ 8               2    1.08 
+ 9               1    1.15 
+10               8    0.351
+11              66    1.5  
+12             247    2.3  
+13             249    0    
+14               4    0.845
+15               0    0.862
+16             254    0    
+17               3    0.963
+18               6    1.13 </code></pre>
 </div>
 </div>
 <p>To actually pull all of the result data into R, we must call <code>collect()</code> on the query object</p>
@@ -394,26 +409,26 @@ GROUP BY passenger_count</code></pre>
              &lt;dbl&gt;    &lt;dbl&gt;
  1               0    0.862
  2             254    0    
- 3             249    0    
- 4               5    1.10 
+ 3               5    1.10 
+ 4               9    0.807
  5              65    0    
- 6               9    0.807
- 7             177    1    
- 8               2    1.08 
- 9             208    0    
-10              10    0    
-11               4    0.845
-12               1    1.15 
-13             247    2.3  
-14               3    0.963
-15               6    1.13 
-16               7    0.544
-17               8    0.351
-18              66    1.5  </code></pre>
+ 6             177    1    
+ 7             247    2.3  
+ 8             208    0    
+ 9              10    0    
+10               7    0.544
+11               8    0.351
+12              66    1.5  
+13             249    0    
+14               4    0.845
+15               1    1.15 
+16               2    1.08 
+17               3    0.963
+18               6    1.13 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>toc <span class="sc">-</span> tic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time difference of 1.2924 secs</code></pre>
+<pre><code>Time difference of 0.3836122 secs</code></pre>
 </div>
 </div>
 </section>
@@ -430,19 +445,19 @@ GROUP BY passenger_count</code></pre>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>q2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Source:   SQL [?? x 4]
-# Database: DuckDB v0.10.1 [gmcd@Darwin 23.4.0:R 4.4.0/:memory:]
+# Database: DuckDB 1.4.3 [root@Darwin 24.6.0:R 4.5.2/:memory:]
    month passenger_count tip_amount fare_amount
    &lt;dbl&gt;           &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
- 1     1               1      1.04         9.76
- 2     2               1      1.07         9.90
+ 1     2               5      1.02         9.98
+ 2     2               9      0            2.5 
  3     3               1      1.09        10.2 
- 4     1               8      0           21.3 
- 5     2               8      0.5          8.23
- 6     1               7      0            6.3 
- 7     1               3      0.875        9.87
- 8     1               6      1.02         9.86
- 9     2               3      0.895        9.98
-10     2               6      1.02         9.96
+ 4     3             208      0            3.3 
+ 5     1               7      0            6.3 
+ 6     1               3      0.875        9.87
+ 7     1               6      1.02         9.86
+ 8     2               8      0.5          8.23
+ 9     1             208      0            3.77
+10     2               0      0.877        8.77
 # ℹ more rows</code></pre>
 </div>
 </div>
@@ -467,32 +482,47 @@ GROUP BY "month", passenger_count
 physical_plan
 ┌───────────────────────────┐
 │       HASH_GROUP_BY       │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│    ────────────────────   │
+│          Groups:          │
 │             #0            │
 │             #1            │
+│                           │
+│        Aggregates:        │
 │          avg(#2)          │
 │          avg(#3)          │
-└─────────────┬─────────────┘                             
+│                           │
+│      ~44,907,395 rows     │
+└─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │         PROJECTION        │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│    ────────────────────   │
 │           month           │
 │      passenger_count      │
 │         tip_amount        │
 │        fare_amount        │
-└─────────────┬─────────────┘                             
+│                           │
+│      ~44,907,396 rows     │
+└─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │       READ_PARQUET        │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│    ────────────────────   │
+│         Function:         │
+│        READ_PARQUET       │
+│                           │
+│        Projections:       │
 │      passenger_count      │
 │        fare_amount        │
 │         tip_amount        │
 │           month           │
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
-│ File Filters: (month &lt;= 3)│
-│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
-│        EC: 44907396       │
-└───────────────────────────┘                             </code></pre>
+│                           │
+│       File Filters:       │
+│ (CAST(month AS DECIMAL(20 │
+│        ,1)) &lt;= 3.0)       │
+│                           │
+│    Scanning Files: 3/12   │
+│                           │
+│      ~44,907,396 rows     │
+└───────────────────────────┘</code></pre>
 </div>
 </div>
 <p>And our high-dimensional aggregation example. We’ll create a query for this first, since I’ll reuse it shortly again</p>
@@ -503,21 +533,25 @@ physical_plan
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">c</span>(tip_amount, fare_amount), mean),</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  ) </span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">collect</span>(q3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by "passenger_count". You can override using
+the `.groups` argument.</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 25,569 × 4
 # Groups:   passenger_count [18]
    passenger_count trip_distance tip_amount fare_amount
              &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
- 1               1          0.7       0.493        5.04
- 2               2          0.8       0.462        5.44
- 3               1          0.8       0.535        5.36
- 4               1          1         0.616        6.01
- 5               1          0.3       0.334        4.11
- 6               1          4.8       1.70        16.0 
- 7               2          1         0.525        6.08
- 8               1          6.7       2.13        20.1 
- 9               1          0.4       0.361        4.17
-10               2          0.98      0.542        5.85
+ 1               4          0.6       0.278        4.92
+ 2               1          4.9       1.73        16.2 
+ 3               2          1.6       0.697        7.88
+ 4               1          5.1       1.76        16.6 
+ 5               1          9.1       3.33        25.1 
+ 6               3          0.8       0.414        5.47
+ 7               1          3.95      1.44        14.0 
+ 8               3          1         0.467        6.12
+ 9               5          0.53      0.367        4.31
+10               0          1.6       0.728        7.36
 # ℹ 25,559 more rows</code></pre>
 </div>
 </div>
@@ -525,26 +559,32 @@ physical_plan
 <section id="pivot-reshape" class="level2">
 <h2 class="anchored" data-anchor-id="pivot-reshape">Pivot (reshape)</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidyr) ## already loaded</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>q3 <span class="sc">|&gt;</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(tip_amount<span class="sc">:</span>fare_amount) <span class="sc">|&gt;</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidyr) ## already loaded</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>q3 <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(tip_amount<span class="sc">:</span>fare_amount) <span class="sc">|&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by "passenger_count". You can override using
+the `.groups` argument.
+`summarise()` has grouped output by "passenger_count". You can override using
+the `.groups` argument.</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 51,138 × 4
 # Groups:   passenger_count [18]
    passenger_count trip_distance name       value
              &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;
- 1               1           2.2 tip_amount 1.01 
- 2               1          16.8 tip_amount 5.58 
- 3               1           2.7 tip_amount 1.16 
- 4               1           5.9 tip_amount 1.93 
- 5               1           8.4 tip_amount 2.93 
- 6               0           2.4 tip_amount 0.924
- 7               1           3.8 tip_amount 1.46 
- 8               1           5.4 tip_amount 1.83 
- 9               1           9.3 tip_amount 3.40 
-10               1           9.8 tip_amount 3.60 
+ 1               1          0.76 tip_amount 0.498
+ 2               1          0.78 tip_amount 0.503
+ 3               1          1.84 tip_amount 0.857
+ 4               1          0.69 tip_amount 0.469
+ 5               1          1.26 tip_amount 0.672
+ 6               1          7.6  tip_amount 2.42 
+ 7               1          1.21 tip_amount 0.658
+ 8               1          1.6  tip_amount 0.816
+ 9               2         22.2  tip_amount 4.10 
+10               3          2    tip_amount 0.725
 # ℹ 51,128 more rows</code></pre>
 </div>
 </div>
@@ -552,40 +592,35 @@ physical_plan
 <section id="joins-merges" class="level2">
 <h2 class="anchored" data-anchor-id="joins-merges">Joins (merges)</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mean_tips  <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_tips =</span> <span class="fu">mean</span>(tip_amount), <span class="at">.by =</span> month)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>mean_fares <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_fares =</span> <span class="fu">mean</span>(fare_amount), <span class="at">.by =</span> month)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mean_tips  <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_tips =</span> <span class="fu">mean</span>(tip_amount), <span class="at">.by =</span> month)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>mean_fares <span class="ot">=</span> nyc <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mean_fares =</span> <span class="fu">mean</span>(fare_amount), <span class="at">.by =</span> month)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Again, these commands complete instantly because all computation has been deferred until absolutely necessary (i.e.,. lazy eval).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  mean_fares,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  mean_tips</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  mean_fares,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  mean_tips</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Joining with `by = join_by(month)`</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Missing values are always removed in SQL aggregation functions.
-Use `na.rm = TRUE` to silence this warning
-This warning is displayed once every 8 hours.</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 12 × 3
    month mean_fares mean_tips
    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1    11      12.3       1.25
- 2     7      10.4       1.06
- 3     8      10.5       1.08
- 4     1       9.81      1.01
- 5     4      10.3       1.04
- 6     5      10.6       1.08
- 7     9      12.4       1.25
- 8    10      12.5       1.28
- 9     2       9.94      1.04
-10    12      12.3       1.24
-11     3      10.2       1.06
-12     6      10.5       1.09</code></pre>
+ 1     8      10.5       1.08
+ 2     6      10.5       1.09
+ 3     9      12.4       1.25
+ 4     5      10.6       1.08
+ 5     7      10.4       1.06
+ 6     3      10.2       1.06
+ 7     2       9.94      1.04
+ 8     4      10.3       1.04
+ 9    12      12.3       1.24
+10    11      12.3       1.25
+11    10      12.5       1.28
+12     1       9.81      1.01</code></pre>
 </div>
 </div>
 </section>
@@ -596,7 +631,7 @@ This warning is displayed once every 8 hours.</code></pre>
 <section id="close-connection" class="level2">
 <h2 class="anchored" data-anchor-id="close-connection">Close connection</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="appendix-related-interfaces" class="level2">
@@ -604,14 +639,14 @@ This warning is displayed once every 8 hours.</code></pre>
 <section id="arrowduckdb" class="level3">
 <h3 class="anchored" data-anchor-id="arrowduckdb">arrow+duckdb</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckdb) <span class="do">## Already loaded</span></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)  <span class="do">## Already loaded</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)  <span class="do">## Already loaded</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckdb) <span class="do">## Already loaded</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)  <span class="do">## Already loaded</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)  <span class="do">## Already loaded</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>When going through the <strong>arrow</strong> intermediary, we don’t need to establish a database with <code>DBI::dbConnect</code> like we did above. Instead, we can create a link (pointers) to the dataset on disk directly via the <code>arrow::open_dataset()</code> convience function. Here I’ll assign it to a new R object called <code>nyc2</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="ot">=</span> <span class="fu">open_dataset</span>(<span class="st">"nyc-taxi"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="ot">=</span> <span class="fu">open_dataset</span>(<span class="st">"nyc-taxi"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -628,9 +663,10 @@ This warning is displayed once every 8 hours.</code></pre>
 </div>
 <p>Note that printing our <code>nyc2</code> dataset to the R console will just display the data schema. This is a cheap and convenient way to quickly interrogate the basic structure of your data, including column types, etc.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>nyc2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>nyc2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>FileSystemDataset with 12 Parquet files
+24 columns
 vendor_name: string
 pickup_datetime: timestamp[ms]
 dropoff_datetime: timestamp[ms]
@@ -651,18 +687,17 @@ tolls_amount: double
 total_amount: double
 improvement_surcharge: double
 congestion_surcharge: double
-pickup_location_id: int64
-dropoff_location_id: int64
-year: int32
-month: int32</code></pre>
+...
+4 more columns
+Use `schema()` to see entire schema</code></pre>
 </div>
 </div>
 <p>The key step for this “arrow + duckdb” <strong>dplyr</strong> workflow is to pass our arrow dataset to DuckDB via the <code>to_duckdb()</code> function.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">to_duckdb</span>(nyc2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">to_duckdb</span>(nyc2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Source:   table&lt;arrow_001&gt; [?? x 24]
-# Database: DuckDB v0.10.1 [root@Darwin 23.4.0:R 4.4.0/:memory:]
+# Database: DuckDB 1.4.3 [root@Darwin 24.6.0:R 4.5.2/:memory:]
    vendor_name pickup_datetime     dropoff_datetime    passenger_count
    &lt;chr&gt;       &lt;dttm&gt;              &lt;dttm&gt;                        &lt;dbl&gt;
  1 CMT         2012-01-20 14:09:36 2012-01-20 14:42:25               1
@@ -687,40 +722,35 @@ month: int32</code></pre>
 <p>Note that this transfer from Arrow to DuckDB is very quick (and memory cheap) because it is a zero copy. We are just passing around pointers instead of actually moving any data. See <a href="https://duckdb.org/2021/12/03/duck-arrow.html">this blog post</a> for more details, but the high-level take away is that we are benefitting from the tightly integrated architectures of these two libraries.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>At this, point all of the regular <strong>dplyr</strong> workflow logic from above should carry over. Just remember to first pass the arrow dataset via the <code>to_duckdb()</code> funciton. For example, here’s our initial aggregation query again:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="sc">|&gt;</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">to_duckdb</span>() <span class="sc">|&gt;</span> <span class="do">## &lt;= key step</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Missing values are always removed in SQL aggregation functions.
-Use `na.rm = TRUE` to silence this warning
-This warning is displayed once every 8 hours.</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>nyc2 <span class="sc">|&gt;</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">to_duckdb</span>() <span class="sc">|&gt;</span> <span class="do">## &lt;= key step</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 18 × 2
    passenger_count mean_tip
              &lt;dbl&gt;    &lt;dbl&gt;
- 1               5    1.10 
- 2               9    0.807
- 3              65    0    
- 4             177    1    
- 5               7    0.544
- 6               8    0.351
- 7              66    1.5  
+ 1             247    2.3  
+ 2               5    1.10 
+ 3               9    0.807
+ 4              65    0    
+ 5             177    1    
+ 6               7    0.544
+ 7             249    0    
  8               1    1.15 
- 9             247    2.3  
-10               4    0.845
-11               0    0.862
-12             254    0    
-13             249    0    
-14               2    1.08 
-15             208    0    
-16              10    0    
-17               3    0.963
-18               6    1.13 </code></pre>
+ 9               0    0.862
+10             254    0    
+11             208    0    
+12              10    0    
+13               4    0.845
+14               8    0.351
+15              66    1.5  
+16               3    0.963
+17               6    1.13 
+18               2    1.08 </code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -739,49 +769,41 @@ This warning is displayed once every 8 hours.</code></pre>
 </section>
 <section id="duckplyr" class="level3">
 <h3 class="anchored" data-anchor-id="duckplyr">duckplyr</h3>
-<p>The new kid on the block is <strong>duckplyr</strong> (<a href="https://duckdb.org/2024/04/02/duckplyr.html">announcement</a> / <a href="https://duckdblabs.github.io/duckplyr/">homepage</a>). Without going into too much depth, the promise of <strong>duckplyr</strong> is that it can provide a “fully native” dplyr experience that is <em>directly</em> coupled to DuckDB’s query engine. So, for example, it won’t have to rely on <strong>DBI</strong>’s generic’ SQL translations. Instead, the relevant <strong>dplyr</strong> “verbs” are being directly translated to DuckDB’s relational API to construct logical query plans. If that’s too much jargon, just know that it should involve less overhead, fewer translation errors, and better optimization. Moreover, a goal of <strong>duckplyr</strong> is for it to be a drop-in replace for <strong>dplyr</strong> <em>in general</em>. In other words, you could just swap out <code>library(dplyr)</code> for <code>library(duckplyr)</code> and all of your data wrangling operations will come backed by the power of DuckDB. This includes for working on “regular” R data frames in memory.</p>
-<p>All of this is exciting and I would urge you stay tuned. Right now, <strong>duckplyr</strong> is still marked as experimental and has a few rough edges. But the basics are there. For example:</p>
+<p>The new(ish) kid on the block is <strong>duckplyr</strong> (<a href="https://duckdb.org/2024/04/02/duckplyr.html">announcement</a> / <a href="https://duckplyr.tidyverse.org/">homepage</a>). Without going into too much depth, the promise of <strong>duckplyr</strong> is that it can provide a “fully native” dplyr experience that is <em>directly</em> coupled to DuckDB’s query engine. So, for example, it won’t have to rely on <strong>DBI</strong>’s generic’ SQL translations. Instead, the relevant <strong>dplyr</strong> “verbs” are being directly translated to DuckDB’s relational API to construct logical query plans. If that’s too much jargon, just know that it should involve less overhead, fewer translation errors, and better optimization. Moreover, a goal of <strong>duckplyr</strong> is for it to be a drop-in replace for <strong>dplyr</strong> <em>in general</em>. In other words, you could just swap out <code>library(dplyr)</code> for <code>library(duckplyr)</code> and all of your data wrangling operations will come backed by the power of DuckDB. This includes for working on “regular” R data frames in memory.</p>
+<p>All of this is exciting and I expect that <strong>duckplyr</strong> will become the default R -&gt; DuckDB interface for many users… and perhaps their default data wrangling tool fullstop. There are still a few rough edges IMO (e.g., factor variables aren’t fully supported <a href="https://github.com/tidyverse/duckplyr/issues/88">yet</a>). But the basics are certainly all there. For example:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckplyr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">duckplyr_df_from_parquet</span>(<span class="st">"nyc-taxi/**/*.parquet"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckplyr, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>✔ Overwriting dplyr methods with duckplyr methods.
+ℹ Turn off with `duckplyr::methods_restore()`.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">read_parquet_duckdb</span>(<span class="st">"nyc-taxi/**/*.parquet"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_tip =</span> <span class="fu">mean</span>(tip_amount),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> passenger_count</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>materializing:
----------------------
---- Relation Tree ---
----------------------
-Aggregate [passenger_count, mean(tip_amount)]
-  read_parquet(nyc-taxi/**/*.parquet)
-
----------------------
--- Result Columns  --
----------------------
-- passenger_count (BIGINT)
-- mean_tip (DOUBLE)
-
-   passenger_count  mean_tip
-1                2 1.0815798
-2              208 0.0000000
-3               10 0.0000000
-4                5 1.1027325
-5                9 0.8068000
-6               65 0.0000000
-7              177 1.0000000
-8                3 0.9629494
-9                6 1.1283649
-10               0 0.8620988
-11             249 0.0000000
-12             254 0.0000000
-13               8 0.3507692
-14               7 0.5441176
-15              66 1.5000000
-16               1 1.1510110
-17             247 2.3000000
-18               4 0.8445190</code></pre>
+<pre><code># A duckplyr data frame: 2 variables
+   passenger_count mean_tip
+             &lt;dbl&gt;    &lt;dbl&gt;
+ 1             247    2.3  
+ 2               7    0.544
+ 3             208    0    
+ 4              10    0    
+ 5               8    0.351
+ 6              66    1.5  
+ 7               5    1.10 
+ 8               9    0.807
+ 9              65    0    
+10             177    1    
+11               2    1.08 
+12             249    0    
+13               4    0.845
+14               0    0.862
+15             254    0    
+16               3    0.963
+17               6    1.13 
+18               1    1.15 </code></pre>
 </div>
 </div>
 
