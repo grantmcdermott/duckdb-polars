@@ -27,7 +27,7 @@ observations in a matter of seconds or less, using only our laptops. And we will
 learn how to scale to even larger contexts where the data exceeds our computers’
 RAM capacity. Finally, we will also discuss some complementary tools and how
 these can be integrated for an efficient end-to-end workflow (data I/O ->
-wrangling -> analysis). 
+wrangling -> analysis).
 
 :::{.callout-important}
 ## Disclaimer

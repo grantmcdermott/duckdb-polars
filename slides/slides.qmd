@@ -11,8 +11,8 @@ author:
     affiliations:
       - Principal Economist, Amazon
     orcid: 0000-0001-7883-8573
-date: May 2, 2024
-# date: last-modified
+# date: May 2, 2024
+date: last-modified
 execute: 
   cache: true
 ---
@@ -60,7 +60,7 @@ Another factor is working in polyglot teams. It would be great to repurpose simi
 ## Taster
 ### DuckDB example
 
-```{r}
+```{r nyc}
 #| cache: true
 #| echo: true
 
@@ -68,7 +68,7 @@ library(duckdb)
 library(arrow)
 library(dplyr)
 
-nyc = open_dataset(here::here("taxi-data"))
+nyc = open_dataset(here::here("nyc-taxi"))
 prettyNum(nrow(nyc), ",")
 
 tic = Sys.time()
@@ -113,7 +113,18 @@ library(showtext)
 showtext_auto()
 
 theme_set(
-    theme_get() + theme(text = element_text(family = "Roboto Condensed"))
+    theme_linedraw(base_family = "Roboto Condensed") +
+    theme(
+        axis.line        = element_line(linewidth = 0.3, colour = "grey10"),
+        axis.ticks       = element_line(linewidth = 0.3, colour = "grey10"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(linetype = "21", colour = "lightgray", linewidth = 0.3),
+        strip.background = element_rect(colour = NA, fill = "gray90"),
+        strip.text       = element_text(colour = "black", size = 12),
+        # panel.border     = element_blank(),
+        panel.spacing    = unit(1, "line"),
+        text             = element_text(family = "Roboto Condensed")
+    )
 )
 # okabeito = c('#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#999999', '#000000')
 okabeito2 = c('#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#999999', '#000000')

@@ -2,21 +2,11 @@
 
 # (Pretty) big data wrangling with DuckDB and Polars
 
-- These materials were prepared as part of the
+_Note: These materials were originally prepared as part of the
 [Workshops for Ukraine](https://sites.google.com/view/dariia-mykhailyshyna/main/r-workshops-for-ukraine#h.xc2x33lbfxln)
-series.
-- The attendance fee is 20 EUR/USD. All proceeds from the workshop are going
-towards aid orgnizations in Ukraine. If you are unable to attend, but would
-still like to contribute, please consider sponsoring a student or colleague.
-See the
-[WFU website](https://sites.google.com/view/dariia-mykhailyshyna/main/r-workshops-for-ukraine#h.xc2x33lbfxln)
-for details.
+series. I have since refined and reused them in other contexts_
 
 **Website:** https://grantmcdermott.com/duckdb-polars
-
-**Date:** Thursday, May 2nd, 18:00 - 20:00 CEST (Rome, Berlin, Paris timezone).
-A recording of the workshop will be available for attendees who cannot make
-the live stream.
 
 **Description:** This workshop will introduce you to [DuckDB](https://duckdb.org/) and
 [Polars](https://github.com/pola-rs/polars), two data wrangling libraries at the

@@ -257,9 +257,9 @@ out the `to_duckdb()` line. For more details, see
 
 ### duckplyr
 
-The new kid on the block is **duckplyr**
+The new(ish) kid on the block is **duckplyr**
 ([announcement](https://duckdb.org/2024/04/02/duckplyr.html) /
-[homepage](https://duckdblabs.github.io/duckplyr/)).
+[homepage](https://duckplyr.tidyverse.org/)).
 Without going into too much depth, the promise of **duckplyr** is that it can
 provide a "fully native" dplyr experience that is _directly_ coupled to DuckDB's
 query engine. So, for example, it won't have to rely on **DBI**'s generic' SQL
@@ -272,14 +272,16 @@ could just swap out `library(dplyr)` for `library(duckplyr)` and all of your
 data wrangling operations will come backed by the power of DuckDB. This includes
 for working on "regular" R data frames in memory.
 
-All of this is exciting and I would urge you stay tuned. Right now, **duckplyr**
-is still marked as experimental and has a few rough edges. But the basics are
-there. For example:
+All of this is exciting and I expect that **duckplyr** will become the default
+R -> DuckDB interface for many users... and perhaps their default data wrangling
+tool fullstop. There are still a few rough edges IMO (e.g., factor variables
+aren't fully supported [yet](https://github.com/tidyverse/duckplyr/issues/88)).
+But the basics are certainly all there. For example:
 
 ```{r duckplyr_q1}
 library(duckplyr, warn.conflicts = FALSE)
 
-duckplyr_df_from_parquet("nyc-taxi/**/*.parquet") |>
+read_parquet_duckdb("nyc-taxi/**/*.parquet") |>
   summarise(
     mean_tip = mean(tip_amount),
     .by = passenger_count

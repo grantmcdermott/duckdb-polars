@@ -44,3 +44,4 @@ rsconnect/
 
 # scratch folder
 SCRATCH/
+**/*.quarto_ipynb

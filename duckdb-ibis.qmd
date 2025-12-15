@@ -24,7 +24,7 @@ from ibis import _
 con = ibis.duckdb.connect()
 
 ## Register our parquet dataset as a table called "nyc" in our connection
-con.register("nyc-taxi/**/*.parquet", "nyc")
+nyc = con.read_parquet("nyc-taxi/**/*.parquet")
 ```
 
 Aside: Remember that you can create a persistent, disk-backed database by giving it an
@@ -32,7 +32,7 @@ appropriate name/path. This also enables out-of-core computation for bigger than
 
 ```py
 # con = ibis.duckdb.connect("nyc.dbb")
-# con.register("nyc-taxi/**/*.parquet", "nyc")
+# nyc = con.read_parquet("nyc-taxi/**/*.parquet")
 # etc.
 ```
 
@@ -40,9 +40,6 @@ Reference the table from Python. We'll call this reference object `nyc` too for 
 Printing the object to screen will give us a lazy preview.
 
 ```{python db_ibis_nyc}
-# con.list_tables() # Optional: confirm that our table is available
-
-nyc = con.table("nyc")
 nyc
 ```
 
@@ -139,7 +136,7 @@ q3
 # now chain on pivoting (and enforce computation via printing)
 (
   q3
-  .pivot_longer(s.r["mean_tip":"mean_fare"])
+  .pivot_longer(["mean_tip", "mean_fare"])
 )
 ```
 
@@ -158,4 +155,10 @@ mean_fares = nyc.group_by("month").agg(mean_fare = _.fare_amount.mean())
   mean_tips
   .left_join(mean_fares, "month")
 )
+```
+
+## Disconnect
+
+```{python db_ibis_disconnect}
+con.disconnect()
 ```
