@@ -4,7 +4,7 @@
     "href": "slides/slides.html#preliminaries",
     "title": "(Pretty) big data wrangling with DuckDB and Polars",
     "section": "Preliminaries",
-    "text": "Preliminaries\nAgenda and expectations\nThese sparse slides are mostly intended to serve as a rough guide map.\n\nMost of what we’ll be doing is live coding and working through examples.\nI strongly encourage you try these examples on you own machines. Laptops are perfectly fine.\n\nNote: All of the material for today’s workshop are available on my website:\n\nhttps://grantmcdermott.com/duckdb-polars",
+    "text": "Preliminaries\nAgenda and expectations\nThese slides are mostly intended to serve as a road map.\n\nMost of what I’ll (we’ll) be doing is live coding and working through examples.\nI strongly encourage you try these examples on you own machines. Laptops are perfectly fine.\n\nNote: All of the materials are available on my website:\n\nhttps://grantmcdermott.com/duckdb-polars",
     "crumbs": [
       "(Pretty) big data wrangling with DuckDB and Polars"
     ]
@@ -14,7 +14,7 @@
     "href": "slides/slides.html#preliminaries-1",
     "title": "(Pretty) big data wrangling with DuckDB and Polars",
     "section": "Preliminaries",
-    "text": "Preliminaries\nRequirements\nImportant: Before continuing, please make sure that you have completed the requirements listed on the workshop website.\n\nInstall the required R and/or Python libraries.\nDownload some NYC taxi data.\n\nThe data download step can take 15-20 minutes, depending on your internet connection.",
+    "text": "Preliminaries\nRequirements\nImportant: If you’d like to follow along, please make sure that you have completed the requirements listed on the website.\n\nInstall the required R and/or Python libraries.\nDownload some NYC taxi data.\n\nThe data download step can take 15-20 minutes, depending on your internet connection.",
     "crumbs": [
       "(Pretty) big data wrangling with DuckDB and Polars"
     ]
@@ -74,7 +74,47 @@
     "href": "slides/slides.html#wait.-how",
     "title": "(Pretty) big data wrangling with DuckDB and Polars",
     "section": "Wait. How??",
-    "text": "Wait. How??\nBetter disk storage 🤝 Better memory representation\nTwo coinciding (r)evolutions enable faster, smarter computation:\n\n\n1. Better on-disk storage\n\nMainly talking about the Parquet file format here.\nColumnar storage format allows better compression (much smaller footprint) and efficient random access to selected rows or columns (don’t have to read the whole dataset a la CSVs).\n\n\n2. Better in-memory representation\n\nStandardisation around the Apache Arrow format + columnar representation. (Allows zero copy, fewer cache misses, etc.)\nOLAP + deferred materialisation. (Rather than “eagerly” executing each query step, we can be “lazy” and optimise queries before executing them.)",
+    "text": "Wait. How??\nBetter disk storage 🤝 Better memory representation\nTwo coinciding (r)evolutions enable faster, smarter computation:\n\n\n1. Better on-disk storage\n\nE.g. Hive-partitioned Parquet files.\nColumnar storage format allows better compression (much smaller footprint) and efficient random access to selected rows or columns (don’t have to read the whole dataset a la CSVs).\n\n\n2. Better in-memory representation\n\nStandardisation around the Apache Arrow format + columnar representation. (Allows zero copy, fewer cache misses, etc.)\nOLAP + materialisation. (Rather than “eagerly” executing each query step, we can be “lazy” and optimise queries before executing them.)",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#query-optimization",
+    "href": "slides/slides.html#query-optimization",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "Query optimization",
+    "text": "Query optimization\nKey concepts\nThree key optimizations work together:\n\nLazy Materialization: When computation happens\nPredicate Pushdown: Where filtering happens\n\nProjection Pushdown: Which columns are read",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#lazy-materialization",
+    "href": "slides/slides.html#lazy-materialization",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "Lazy Materialization",
+    "text": "Lazy Materialization\nWhen computation happens\n\nBuild query plan first, execute later\nOnly compute when results are needed (.collect(), .show())\nEnables global optimization across entire pipeline\n\nExample: SELECT operations are bumped to the top of an (optimzed) query to avoid unecessary work",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#predicate-pushdown",
+    "href": "slides/slides.html#predicate-pushdown",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "Predicate Pushdown",
+    "text": "Predicate Pushdown\nWhich rows are read\n\nPush WHERE conditions to the storage layer\nFilter at file/partition level before reading into memory\nDramatically reduces I/O by skipping irrelevant data\n\nExample: WHERE month = 3 → Only scan March parquet files",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#projection-pushdown",
+    "href": "slides/slides.html#projection-pushdown",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "Projection Pushdown",
+    "text": "Projection Pushdown\nWhich columns are read\n\nOnly read columns actually needed for the query\nSkip unnecessary columns at the storage layer\nReduces memory usage and I/O bandwidth\n\nExample: SELECT tip_amount → Only read tip column, skip other 29 columns",
     "crumbs": [
       "(Pretty) big data wrangling with DuckDB and Polars"
     ]
@@ -85,6 +125,26 @@
     "title": "(Pretty) big data wrangling with DuckDB and Polars",
     "section": "Scaling up",
     "text": "Scaling up\nEven moar benchmarks\nQuestion: Do these benchmarks hold and scale more generally? Answer: Yes. See Database-like ops benchmark.\nMoreover—and I think this is key—these kinds of benchmarks normally exclude the data I/O component… and the associated benefits of not having to hold the whole dataset in RAM.\n\nThere are some fantastically fast in-memory data wrangling libraries out there. (My personal faves: data.table and collapse.) But “in-memory” means that you always have to keep the full dataset in, well, memory. And this can be expensive.\nLibraries like DuckDB and Polars sidestep this problem, effectively supercharging your computer’s data wrangling powers.",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#duckdb",
+    "href": "slides/slides.html#duckdb",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "DuckDB",
+    "text": "DuckDB\n\n\nEmbedded C++ analytical database (no server needed)\nMultiple language frontends (R, Python, Julia, etc.)\nSQL interface with “friendly” extensions\nExcellent for out-of-memory operations",
+    "crumbs": [
+      "(Pretty) big data wrangling with DuckDB and Polars"
+    ]
+  },
+  {
+    "objectID": "slides/slides.html#polars",
+    "href": "slides/slides.html#polars",
+    "title": "(Pretty) big data wrangling with DuckDB and Polars",
+    "section": "Polars",
+    "text": "Polars\n\n\nEmbedded Rust-based DataFrame library\nPython/R bindings (multiple language support)\nDataFrame interface with lazy evaluation\nBuilt on Apache Arrow memory format",
     "crumbs": [
       "(Pretty) big data wrangling with DuckDB and Polars"
     ]
@@ -124,7 +184,7 @@
     "href": "slides/slides.html#what-didnt-we-cover-2",
     "title": "(Pretty) big data wrangling with DuckDB and Polars",
     "section": "What didn’t we cover?",
-    "text": "What didn’t we cover?\nOther cool features (cont.)\n\nModeling\n\nThe modeling part of this workflow is less tightly integrated b/c we generally have to bring the data into RAM.\nBut being able to quickly I/O parts of large datasets makes it very easy to iteratively run analyses on subsets of your data. E.g., I typically pair with fixest for unmatched performance on high-dimensional data.\nYou can also run bespoke models via UDFs and/or predictions on database backends. [Ex. 1, 2, 3]\nFWIW I believe that the underlying matrix and linear algebra libraries for direct modeling with these tools are coming. [Ex. 1, 2]",
+    "text": "What didn’t we cover?\nOther cool features (cont.)\n\nModeling\n\nThe modeling part used to be less tightly integrated with DuckDB/Polars workflows. But that’s changing rapidly, e.g.: dbreg, duckreg, and duckdb-mlpack.\nFWIW being able to quickly I/O parts of large datasets makes it very easy to iteratively run analyses on subsets of your data. E.g., I often pair with fixest for exceptional in-memory performance.\nYou can also run bespoke models via UDFs and/or predictions on database backends. [Ex. 1, 2, 3]",
     "crumbs": [
       "(Pretty) big data wrangling with DuckDB and Polars"
     ]
