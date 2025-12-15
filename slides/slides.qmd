@@ -21,12 +21,12 @@ execute:
 
 ### Agenda and expectations
 
-These sparse slides are mostly intended to serve as a rough guide map.
+These slides are mostly intended to serve as a road map.
 
-- Most of what we'll be doing is live coding and working through examples.
-- I _strongly_ encourage you try these examples on you own machines. Laptops are perfectly fine. 
+- Most of what I'll (we'll) be doing is live coding and working through examples.
+- I strongly encourage you try these examples on you own machines. Laptops are perfectly fine. 
 
-**Note:** All of the material for today's workshop are available on my website:
+**Note:** All of the materials are available on my website:
 
 - **<https://grantmcdermott.com/duckdb-polars>**
 
@@ -34,9 +34,9 @@ These sparse slides are mostly intended to serve as a rough guide map.
 
 ### Requirements
 
-**Important:** Before continuing, please make sure that you have completed the
+**Important:** If you'd like to follow along, please make sure that you have completed the
 [requirements](https://grantmcdermott.com/duckdb-polars/requirements.html)
-listed on the workshop website.
+listed on the website.
 
 - Install the required R and/or Python libraries.
 - Download some NYC taxi data.
@@ -261,7 +261,7 @@ Two coinciding (r)evolutions enable faster, smarter computation:
 
 #### 1. Better on-disk storage
 
-- Mainly talking about the [Parquet](https://parquet.apache.org/) file format here.
+- E.g. Hive-partitioned [Parquet](https://parquet.apache.org/) files.
 - Columnar storage format allows better compression (much smaller footprint) and efficient random access to selected rows or columns (don't have to read the whole dataset _a la_ CSVs).
 
 :::
@@ -271,11 +271,47 @@ Two coinciding (r)evolutions enable faster, smarter computation:
 #### 2. Better in-memory representation
 
 - Standardisation around the [Apache Arrow](https://arrow.apache.org/) format + columnar representation. (Allows zero copy, fewer cache misses, etc.)
-- [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing) + deferred [materialisation](https://en.wikipedia.org/wiki/Materialized_view). (Rather than "eagerly" executing each query step, we can be "lazy" and optimise queries before executing them.)
+- [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing) + [materialisation](https://en.wikipedia.org/wiki/Materialized_view). (Rather than "eagerly" executing each query step, we can be "lazy" and optimise queries before executing them.)
 
 :::
 
 ::::
+
+## Query optimization
+### Key concepts
+
+Three key optimizations work together:
+
+- **Lazy Materialization:** *When* computation happens
+- **Predicate Pushdown:** *Where* filtering happens  
+- **Projection Pushdown:** *Which* columns are read
+
+## Lazy Materialization
+### When computation happens
+
+- Build query plan first, execute later
+- Only compute when results are needed (`.collect()`, `.show()`)
+- Enables global optimization across entire pipeline
+
+**Example:** `SELECT` operations are bumped to the top of an (optimzed) query to avoid unecessary work
+
+## Predicate Pushdown
+### Which rows are read
+
+- Push `WHERE` conditions to the storage layer
+- Filter at file/partition level before reading into memory
+- Dramatically reduces I/O by skipping irrelevant data
+
+**Example:** `WHERE month = 3` → Only scan March parquet files
+
+## Projection Pushdown
+### Which columns are read
+
+- Only read columns actually needed for the query
+- Skip unnecessary columns at the storage layer
+- Reduces memory usage and I/O bandwidth
+
+**Example:** `SELECT tip_amount` → Only read tip column, skip other 29 columns
 
 ## Scaling up
 ### Even moar benchmarks
@@ -287,6 +323,21 @@ Moreover---and I think this is key---these kinds of benchmarks normally exclude 
 - There are some fantastically fast in-memory data wrangling libraries out there. (My personal faves: [data.table](https://github.com/Rdatatable/data.table) and [collapse](https://github.com/SebKrantz/collapse).) But "in-memory" means that you always have to keep the full dataset in, well, memory. And this can be expensive.
 - Libraries like DuckDB and Polars sidestep this problem, effectively supercharging your computer's data wrangling powers.
 
+## DuckDB
+![](images/duckdb_logo.png){width="300px"}
+
+- Embedded C++ analytical database (no server needed)
+- Multiple language frontends (R, Python, Julia, etc.)
+- SQL interface with "friendly" extensions
+- Excellent for out-of-memory operations
+
+## Polars  
+![](images/polars_logo.jpg){width="300px"}
+
+- Embedded Rust-based DataFrame library
+- Python/R bindings (multiple language support)
+- DataFrame interface with lazy evaluation
+- Built on Apache Arrow memory format
 
 ## Examples
 ### Live coding sessions
@@ -333,10 +384,9 @@ Let's head back to the website to work through some notebooks.
 ### Other cool features (cont.)
 
 - **Modeling**
-  - The modeling part of this workflow is less tightly integrated b/c we generally have to bring the data into RAM.
-  - But being able to quickly I/O parts of large datasets makes it very easy to iteratively run analyses on subsets of your data. E.g., I typically pair with [**fixest**](https://lrberge.github.io/fixest/) for unmatched performance on high-dimensional data.
+  - The modeling part _used_ to be less tightly integrated with DuckDB/Polars workflows. But that's changing rapidly, e.g.: [**dbreg**](https://github.com/grantmcdermott/dbreg), [**duckreg**](https://github.com/py-econometrics/duckreg), and [**duckdb-mlpack**](https://github.com/eddelbuettel/duckdb-mlpack).
+  - FWIW being able to quickly I/O parts of large datasets makes it very easy to iteratively run analyses on subsets of your data. E.g., I often pair with [**fixest**](https://lrberge.github.io/fixest/) for exceptional in-memory performance.
   - You can also run bespoke models via UDFs and/or predictions on database backends. [Ex. [1](https://duckdb.org/2023/07/07/python-udf.html), [2](https://posit-conf-2023.github.io/arrow/materials/4_data_manipulation_2.html#/user-defined-functions-aka-udfs), [3](https://tidypredict.tidymodels.org/)]
-  - FWIW I believe that the underlying matrix and linear algebra libraries for _direct_ modeling with these tools are coming. [Ex. [1](https://arrow.apache.org/docs/cpp/api/tensor.html), [2](https://substrait.io/extensions/functions_arithmetic/)]
 
 ## Resources
 ### Learning more
