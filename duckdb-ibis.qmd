@@ -3,7 +3,7 @@ title: DuckDB + Ibis (Python)
 subtitle: Use a dplyr-esque Python frontend
 execute:
   freeze: auto
-  cache: true
+  cache: false
 ---
 
 ## Load libraries

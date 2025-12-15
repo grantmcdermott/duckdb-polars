@@ -2,6 +2,7 @@
 
 # (Pretty) big data wrangling with DuckDB and Polars
 
+
 - These materials were prepared as part of the
 [Workshops for Ukraine](https://sites.google.com/view/dariia-mykhailyshyna/main/r-workshops-for-ukraine#h.xc2x33lbfxln)
 series.
